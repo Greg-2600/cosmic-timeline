@@ -1,5 +1,5 @@
 /* Service worker — caches the app shell plus all event images for offline use. */
-const VERSION = "v4";
+const VERSION = "v6";
 const CORE_CACHE = `core-${VERSION}`;
 const RUNTIME_CACHE = `images-${VERSION}`;
 const CORE_URLS = ["./timeline.html"];

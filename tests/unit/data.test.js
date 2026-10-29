@@ -5,8 +5,8 @@ const core = require("../../timeline-core.js");
 const M = core.MILESTONES;
 const ERAS = Object.keys(core.ERA_COLORS);
 
-test("there are 23 milestones spanning Big Bang → Present", () => {
-  assert.equal(M.length, 76);
+test("there are 92 milestones spanning Big Bang → Present", () => {
+  assert.equal(M.length, 92);
   assert.equal(M[0].title, "The Big Bang");
   assert.equal(M[0].yearsAgo, 13_800_000_000);
   assert.equal(M[M.length - 1].yearsAgo, 0);

@@ -75,6 +75,17 @@ test("quiz, permalinks and handout ship in the page", () => {
   assert.ok(HTML.includes("@media print"), "print stylesheet present");
 });
 
+test("i18n: STRINGS table ships en + it with used keys", () => {
+  const c = require("../../timeline-core.js");
+  const en = c.STRINGS.en;
+  const it = c.STRINGS.it;
+  ["kidTitle", "storyTitle", "deepTitle", "readMore", "btnQuiz", "btnGlossary", "packsTitle"].forEach((k) => {
+    assert.ok(en[k], "en missing " + k);
+    assert.ok(it[k], "it missing " + k);
+  });
+  assert.match(it.headerSub, /linea del tempo/i, "Italian header set");
+});
+
 test("accessibility hooks exist", () => {
   assert.ok(HTML.includes("aria-label"));
   assert.ok(HTML.includes('setAttribute("role", "button")'));

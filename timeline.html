@@ -495,6 +495,30 @@
 
   .packs-list button:hover { border-color: var(--accent); background: rgba(56, 189, 248, 0.06); }
 
+  /* Story reader: big-type full screen */
+  .story-reader {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow-y: auto;
+  }
+  .story-reader[hidden] { display: none; }
+
+  .reader-inner { max-width: 860px; padding: 3rem 2.5rem; position: relative; }
+  .reader-time { color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; font-size: 0.85rem; margin-bottom: 1rem; }
+  .reader-title { margin: 0 0 1.25rem; font-size: clamp(2rem, 6vw, 3.4rem); line-height: 1.1; }
+  .reader-kid { font-size: clamp(1.15rem, 2.4vw, 1.55rem); line-height: 1.75; color: #dbe2ee; white-space: pre-wrap; }
+  .reader-kid b { color: var(--accent); }
+  .reader-nav { margin-top: 2rem; display: flex; justify-content: center; gap: 0.6rem; }
+  .reader-guide { margin-top: 1.2rem; color: var(--muted); font-size: 0.8rem; }
+
+  .reader-inner .glossary-close { position: absolute; top: -1rem; right: -0.5rem; width: 40px; height: 40px; font-size: 1.1rem; background: var(--surface); }
+
   /* print pack layout */
   #print-sheet .pack-sub { color: #444; font-size: 10pt; margin: 4pt 0 12pt; }
   #print-sheet .pack-event { break-inside: avoid-page; margin-bottom: 12pt; border-top: 1pt dashed #999; padding-top: 6pt; }
@@ -883,17 +907,21 @@
 
 <header>
   <h1>Cosmic Timeline</h1>
-  <p class="sub">A horizontal number-line of events from the Big Bang to the modern era</p>
+  <p class="sub" data-i18n="headerSub">A horizontal number-line of events from the Big Bang to the modern era</p>
 </header>
 
 <div class="scroll-hint">
-  <span>Scroll or swipe horizontally to explore&nbsp;·&nbsp;Click or hover a marker for details</span>
+  <span data-i18n="hint">Scroll or swipe horizontally to explore · Click or hover a marker for details · Wheel zooms</span>
   <kbd>← →</kbd>
   <div class="hint-spacer"></div>
+    <select id="lang-select" class="seg" aria-label="Language">
+      <option value="en">EN</option>
+      <option value="it">IT</option>
+    </select>
   <div class="controls">
-    <button class="seg on" id="mode-deep" type="button">Deep time</button>
-    <button class="seg" id="mode-human" type="button">Civilization</button>
-    <button class="seg" id="mode-powers" type="button" title="World superpowers and their large events">Powers</button>
+    <button class="seg on" id="mode-deep" type="button" data-i18n="modeDeep">Deep time</button>
+    <button class="seg" id="mode-human" type="button" data-i18n="modeCiv">Civilization</button>
+    <button class="seg" id="mode-powers" type="button" title="World superpowers and their large events" data-i18n="modePowers">Powers</button>
     <button class="seg" id="zoom-out" type="button" title="Zoom out (mouse wheel too)">➖</button>
     <button class="seg" id="zoom-in" type="button" title="Zoom in (mouse wheel too)">➕</button>
   </div>
@@ -905,11 +933,13 @@
 
 <div class="searchbar">
   <input id="search-input" type="search" placeholder="Search events — try “moon”, “oxygen”, “Rome”…" autocomplete="off" spellcheck="false" />
-  <button id="quiz-btn" class="seg" type="button" title="Classroom quiz: which came first?">🎓 Quiz</button>
-  <button id="glossary-btn" class="seg" type="button" title="All words-to-know">🔤 Glossary</button>
-  <button id="tour-btn" class="seg" type="button" title="Step through the whole story automatically">▶ Take the tour</button>
-  <button id="print-btn" class="seg" type="button" title="Print a one-page handout for the selected event">🖨 Handout</button>
+  <button id="quiz-btn" class="seg" type="button" title="Classroom quiz: which came first?" data-i18n="btnQuiz">🎓 Quiz</button>
+  <button id="glossary-btn" class="seg" type="button" title="All words-to-know" data-i18n="btnGlossary">🔤 Glossary</button>
+  <button id="tour-btn" class="seg" type="button" title="Step through the whole story automatically" data-i18n="btnTour">▶ Take the tour</button>
+  <button id="print-btn" class="seg" title="Print a one-page handout" data-ignore="1" type="button" title="Print a one-page handout for the selected event">🖨 Handout</button>
   <button id="packs-btn" class="seg" type="button" title="Multi-page classroom worksheet for an era">📘 Packs</button>
+    <button id="read-btn" class="seg" type="button" title="Full-screen reading mode" data-i18n="btnRead">📖 Read</button>
+    <button id="narrate-btn" class="seg" type="button" title="Read the story aloud" data-i18n="btnNarrate">🔊 Narrate</button>
   <div id="search-results" class="search-results" hidden></div>
 </div>
 
@@ -944,6 +974,21 @@
 </div>
 
 <div id="print-sheet" hidden></div>
+
+<div class="story-reader" id="story-reader" hidden>
+  <div class="reader-inner">
+    <button class="glossary-close" id="reader-close" aria-label="Close reader">✕</button>
+    <div class="reader-time" id="reader-time"></div>
+    <h1 class="reader-title" id="reader-title"></h1>
+    <div class="reader-kid" id="reader-kid"></div>
+    <div class="reader-nav">
+      <button class="nav-btn" id="reader-prev" aria-label="Previous event">‹</button>
+      <button class="nav-btn" id="reader-narrate" aria-label="Read aloud">🔊</button>
+      <button class="nav-btn" id="reader-next" aria-label="Next event">›</button>
+    </div>
+    <p class="reader-guide" id="reader-guide"></p>
+  </div>
+</div>
 
 <div class="viewport">
   <div class="track" id="track" tabindex="0">
@@ -1539,7 +1584,7 @@ function renderDetail(index) {
   const kid = document.createElement("div");
   kid.className = "kid-card";
   const kidH = document.createElement("h3");
-  kidH.textContent = "🌟 For young explorers";
+  kidH.textContent = (TimelineCore.STRINGS[uiLang] || TimelineCore.STRINGS.en).kidTitle;
   const kidP = document.createElement("p");
   kidP.textContent = m.kid;
   const funP = document.createElement("p");
@@ -1553,7 +1598,7 @@ function renderDetail(index) {
   const story = document.createElement("div");
   story.className = "story-cell";
   const storyH = document.createElement("h3");
-  storyH.textContent = "📖 The bigger story";
+  storyH.textContent = (TimelineCore.STRINGS[uiLang] || TimelineCore.STRINGS.en).storyTitle;
   const storyP = document.createElement("p");
   storyP.textContent = m.summary;
   story.appendChild(storyH);
@@ -1568,7 +1613,7 @@ function renderDetail(index) {
   const deep = document.createElement("div");
   deep.className = "detail-block";
   const deepH = document.createElement("h3");
-  deepH.textContent = "🎓 Go deeper (nerd-level)";
+  deepH.textContent = (TimelineCore.STRINGS[uiLang] || TimelineCore.STRINGS.en).deepTitle;
   const ul = document.createElement("ul");
   m.deep.forEach((d) => {
     const li = document.createElement("li");
@@ -1637,7 +1682,7 @@ function renderDetail(index) {
     more.href = LEARN_MORE[m.title];
     more.target = "_blank";
     more.rel = "noopener";
-    more.textContent = "🔗 Read more: " + m.title + " · Wikipedia";
+    more.textContent = (TimelineCore.STRINGS[uiLang] || TimelineCore.STRINGS.en).readMore.replace("🔗 Read more", "🔗") + ": " + m.title + " · Wikipedia";
     panelBody.appendChild(more);
   }
 }
@@ -2233,6 +2278,127 @@ quizBtn.addEventListener("click", function () {
 quizCloseBtn.addEventListener("click", closeQuiz);
 quizModal.addEventListener("click", function (e) {
   if (e.target === quizModal) closeQuiz();
+});
+
+I18N = TimelineCore.STRINGS;
+const urlLang = new URLSearchParams(location.search).get('lang') || localStorage.getItem('ct-lang') || 'en';
+let uiLang = (['en','it'].includes(urlLang)) ? urlLang : 'en';
+function applyLang() {
+  localStorage.setItem('ct-lang', uiLang);
+  const dict = I18N[uiLang] || I18N.en;
+  document.querySelectorAll('[data-i18n]').forEach(function (el) {
+    const key = el.dataset.i18n;
+    if (dict[key]) el.textContent = dict[key];
+  });
+  const si = document.getElementById('search-input');
+  if (si) si.placeholder = (dict.searchPlaceholder || '').replace('€search-hints€', searchHintWords());
+  const ls = document.getElementById('lang-select');
+  if (ls) ls.value = uiLang;
+  document.documentElement.lang = uiLang;
+}
+function searchHintWords() {
+  return (uiLang === 'it') ? 'luna, ossigeno, Roma' : 'moon, oxygen, Rome';
+}
+let NARRATE_ON = false;
+function speakText(text) {
+  try {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = (uiLang === 'it') ? 'it-IT' : 'en-US';
+    u.rate = 0.95;
+    window.speechSynthesis.speak(u);
+  } catch (e) {}
+}
+function stopSpeech() {
+  try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (e) {}
+}
+
+/* -------------------------------------------------------------
+   Story reader: full-screen, large type, kid tier
+   ------------------------------------------------------------- */
+(function readerFeature() {
+  const reader = document.getElementById('story-reader');
+  if (!reader) return;
+  let idx = 0;
+  let open = false;
+  function render() {
+    const m = MILESTONES[idx];
+    document.getElementById('reader-time').textContent = formatTime(m.yearsAgo);
+    document.getElementById('reader-title').textContent = m.title;
+    const kidEl = document.getElementById('reader-kid');
+    kidEl.textContent = m.kid;
+    document.getElementById('reader-guide').textContent = TimelineCore.STRINGS[uiLang].readerGuided;
+    if (NARRATE_ON) speakText(m.kid);
+  }
+  function openReader(i) {
+    idx = i; open = true; reader.hidden = false;
+    document.body.style.overflow = 'hidden';
+    render();
+    try { scrollToMarker(i); } catch (e) {}
+  }
+  function closeReader() {
+    open = false; reader.hidden = true;
+    document.body.style.overflow = '';
+    stopSpeech();
+  }
+  function flip(delta) {
+    idx = (idx + delta + MILESTONES.length) % MILESTONES.length;
+    render();
+    try { scrollToMarker(idx); } catch (e) {}
+  }
+  document.getElementById('reader-close').addEventListener('click', closeReader);
+  document.getElementById('reader-prev').addEventListener('click', function () { flip(-1); });
+  document.getElementById('reader-next').addEventListener('click', function () { flip(1); });
+  document.getElementById('reader-narrate').addEventListener('click', function () {
+    if (NARRATE_ON) { stopSpeech(); NARRATE_ON = false; }
+    else { NARRATE_ON = true; speakText(MILESTONES[idx].kid); }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!open) return;
+    if (e.key === 'ArrowRight') { e.preventDefault(); flip(1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); flip(-1); }
+  });
+  document.getElementById('read-btn').addEventListener('click', function () {
+    openReader(pinnedIndex !== null ? pinnedIndex : 0);
+  });
+  window.__storyReader = { openReader: openReader, closeReader: closeReader, isOpen: function () { return open; } };
+})();
+
+/* narration toggle in the toolbar */
+(function narrateFeature() {
+  const nb = document.getElementById('narrate-btn');
+  if (!nb) return;
+  nb.addEventListener('click', function () {
+    NARRATE_ON = !NARRATE_ON;
+    nb.textContent = NARRATE_ON ? '⏹ Stop narration' : '🔊 Narrate';
+    if (NARRATE_ON) {
+      const idx = pinnedIndex !== null ? pinnedIndex : (hoveredIndex !== null ? hoveredIndex : 0);
+      speakText(MILESTONES[idx].kid);
+    } else stopSpeech();
+  });
+  const obs = new MutationObserver(function () { /* allow narration refreshes on tours */ });
+})();
+
+/* tour speaks when narration is on */
+(function tourNarration() {
+  const origSelectEvent = selectEvent;
+  selectEvent = function (i) {
+    origSelectEvent(i);
+    if (NARRATE_ON) speakText(MILESTONES[i].kid);
+  };
+})();
+
+/* lang switch wiring */
+(function langFeature() {
+  const sel = document.getElementById('lang-select');
+  if (!sel) return;
+  applyLang();
+  sel.addEventListener('change', function () {
+    uiLang = sel.value;
+    applyLang();
+    if (typeof updatePanel === 'function') updatePanel();
+  });
 });
 
 /* -------------------------------------------------------------

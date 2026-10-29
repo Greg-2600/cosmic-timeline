@@ -27,7 +27,7 @@ test("Civilization view excludes pre-agriculture events and the Biblical/Powers 
     assert.equal(core.visibleInCivilization(m), expected, m.title + " visibility");
   });
   const included = M.filter((m) => core.visibleInCivilization(m));
-  assert.equal(included.length, 24, "should be exactly 24 civilization events");
+  assert.equal(included.length, 31, "should be exactly 31 civilization events");
 });
 
 test("Civilization view is monotonically increasing and well spread", () => {
