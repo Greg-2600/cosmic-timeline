@@ -1,0 +1,16 @@
+{
+  "name": "cosmic-timeline",
+  "version": "1.0.0",
+  "description": "A scrollable horizontal number-line of events from the Big Bang to the modern era — with kid, story, and nerd-level details for every milestone.",
+  "private": true,
+  "main": "timeline.html",
+  "scripts": {
+    "start": "node scripts/serve.js",
+    "test:unit": "node --test tests/unit/",
+    "test:e2e": "node tests/selenium.js",
+    "test": "npm run test:unit && npm run test:e2e"
+  },
+  "devDependencies": {
+    "selenium-webdriver": "^4.51.0"
+  }
+}

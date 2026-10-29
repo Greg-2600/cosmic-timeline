@@ -1,0 +1,2259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cosmic Timeline — Big Bang to Modern Era</title>
+<meta name="theme-color" content="#0b0d10" />
+<link rel="manifest" href="./manifest.webmanifest" />
+<link rel="icon" href="./icon.svg" type="image/svg+xml" />
+<style>
+  :root {
+    --bg: #0b0d10;
+    --surface: #131720;
+    --line: #252a36;
+    --text: #e8eaf2;
+    --muted: #8b93a3;
+    --accent: #38bdf8;
+    --accent-dim: #1e6f9e;
+    --dot: #7dd3fc;
+    --dot-active: #fbbf24;
+    --card: #161b26;
+    --border: #222a37;
+  }
+
+  * { box-sizing: border-box; }
+
+  html {
+    background: var(--bg);
+  }
+
+  body {
+  margin: 0;
+  padding: 0;
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Context wash: colored by the events currently in view */
+.wash {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.wash .blob {
+  position: absolute;
+  width: 60vw;
+  height: 46vh;
+  border-radius: 50%;
+  filter: blur(80px);
+  transition: background-color 1.4s ease, left 1.4s ease, top 1.4s ease;
+}
+
+  /* Header */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(180deg, rgba(11,13,16,0.85), rgba(11,13,16,0));
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .sub {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin: 0;
+  }
+
+  /* Scroll hint */
+  .scroll-hint {
+    position: sticky;
+    top: 70px;
+    z-index: 40;
+    padding: 0.55rem 1.5rem;
+    background: rgba(19, 23, 32, 0.8);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .scroll-hint kbd {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.15rem 0.4rem;
+    font-family: inherit;
+    font-size: 0.75rem;
+    color: var(--accent);
+  }
+
+  /* Era legend */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+    padding: 0.6rem 1.5rem;
+    background: rgba(19, 23, 32, 0.6);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .legend .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .legend .chip:hover {
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  .legend .chip .swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    box-shadow: 0 0 6px currentColor;
+  }
+
+  /* Scale-mode toggle */
+  .controls {
+    display: flex;
+    gap: 0.35rem;
+    align-items: center;
+    margin-left: auto;
+  }
+
+  .seg {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 0.72rem;
+    padding: 0.3rem 0.8rem;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .seg.on {
+    color: var(--bg);
+    background: var(--accent);
+    border-color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* Search */
+  .searchbar {
+    position: relative;
+    padding: 0.6rem 1.5rem;
+    background: rgba(19, 23, 32, 0.6);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: center;
+    z-index: 45;
+  }
+
+  #search-input {
+    width: min(520px, 95%);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text);
+    padding: 0.45rem 1rem;
+    font-size: 0.9rem;
+    outline: none;
+  }
+
+  #search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12); }
+
+  #search-input::placeholder { color: var(--muted); }
+
+  .search-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(520px, 95%);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    z-index: 70;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+    max-height: 240px;
+    overflow-y: auto;
+  }
+
+  .search-result {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem 0.9rem;
+    background: none;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.88rem;
+  }
+
+  .search-result:hover { background: rgba(56, 189, 248, 0.08); }
+
+  .search-result .sr-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: none;
+  }
+
+  .search-result .sr-time {
+    color: var(--muted);
+    font-size: 0.72rem;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  .search-empty {
+    padding: 0.7rem 0.9rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .scroll-hint .hint-spacer { flex: 1; }
+
+  /* Learn-more link inside the details panel */
+  .learn-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .learn-more:hover { text-decoration: underline; }
+
+  /* Glossary chips: words to know for this event */
+  .glossary-chips {
+    margin: 1rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+  }
+
+  .glossary-chips .gl-title {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--muted);
+    margin-right: 0.3rem;
+  }
+
+  .glossary-chip {
+    font-size: 0.78rem;
+    background: rgba(56, 189, 248, 0.07);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    color: #cfe8f7;
+    border-radius: 999px;
+    padding: 0.2rem 0.55rem;
+    cursor: help;
+  }
+
+  .glossary-chip[title]:hover { border-color: var(--accent); }
+
+  /* Full glossary modal */
+  .glossary-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(5, 7, 10, 0.55);
+    backdrop-filter: blur(4px);
+  }
+
+  .glossary-modal[hidden] { display: none; }
+
+  .glossary-card {
+    width: min(680px, 92vw);
+    max-height: 78vh;
+    overflow-y: auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem 1.5rem;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+  }
+
+  .glossary-card h2 {
+    margin: 0 0 0.25rem;
+    font-size: 1.1rem;
+  }
+
+  .glossary-card .gl-sub {
+    margin: 0 0 1rem;
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  .glossary-item {
+    padding: 0.6rem 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .glossary-item b { color: var(--accent); font-weight: 600; }
+
+  .glossary-item p {
+    margin: 0.2rem 0 0;
+    color: #c7ccd8;
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .glossary-close {
+    position: absolute;
+    top: 1.1rem;
+    right: 1.2rem;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--muted);
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+
+  .glossary-close:hover { color: var(--text); border-color: var(--text); }
+
+  .glossary-card { position: relative; }
+
+  /* Quiz modal */
+  .quiz-card { width: min(560px, 92vw); }
+
+  .quiz-question {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 0.5rem 0 0.9rem;
+  }
+
+  .quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .quiz-option {
+    text-align: left;
+    font: inherit;
+    font-size: 0.95rem;
+    padding: 0.6rem 0.9rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .quiz-option:hover:not(:disabled) { border-color: var(--accent); }
+
+  .quiz-option:disabled { cursor: default; opacity: 0.85; }
+
+  .quiz-option.correct {
+    border-color: #2fbf71;
+    background: rgba(47, 191, 113, 0.12);
+  }
+
+  .quiz-option.wrong {
+    border-color: #e05d5d;
+    background: rgba(224, 93, 93, 0.12);
+  }
+
+  .quiz-feedback {
+    margin: 0.8rem 0 0;
+    padding: 0.55rem 0.8rem;
+    border-radius: 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: #c7ccd8;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .quiz-next {
+    margin-top: 0.9rem;
+  }
+
+  /* Print handout — only the sheet prints, the app does not */
+  @media print {
+    body > *:not(#print-sheet) { display: none !important; }
+    #print-sheet {
+      display: block !important;
+      color: #000;
+      background: #fff;
+      font-family: Georgia, serif;
+    }
+    #print-sheet h1 { font-size: 20pt; margin: 0 0 4pt; }
+    #print-sheet h2 { font-size: 13pt; margin: 14pt 0 4pt; border-bottom: 1pt solid #999; padding-bottom: 2pt; }
+    #print-sheet .meta { color: #444; font-size: 10pt; margin-bottom: 10pt; }
+    #print-sheet p, #print-sheet li { font-size: 10.5pt; line-height: 1.45; }
+    #print-sheet ul { padding-left: 14pt; margin: 4pt 0 8pt; }
+    #print-sheet .chip { display: inline-block; border: 1pt solid #bbb; border-radius: 8pt; padding: 0 6pt; margin: 2pt 4pt 2pt 0; font-size: 9pt; }
+    #print-sheet footer { margin-top: 14pt; font-size: 8.5pt; color: #666; border-top: 1pt solid #999; padding-top: 4pt; }
+  }
+
+  #print-sheet[hidden] { display: none; }
+
+  #glossary-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  /* Timeline viewport */
+  .viewport {
+    padding: 2rem 1.5rem 4rem;
+    min-height: 60vh;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+  }
+
+  .viewport::-webkit-scrollbar {
+    height: 10px;
+  }
+  .viewport::-webkit-scrollbar-track {
+    background: var(--surface);
+    border-radius: 5px;
+  }
+  .viewport::-webkit-scrollbar-thumb {
+    background: var(--line);
+    border-radius: 5px;
+  }
+  .viewport::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-dim);
+  }
+
+  .track {
+    position: relative;
+    width: 350vw;
+    min-width: 350vw;
+    height: 340px;
+  }
+
+  /* Number line */
+  .number-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 200px;
+    height: 4px;
+    background: var(--line);
+    border-radius: 2px;
+  }
+
+  /* Milestone markers */
+  .marker {
+    position: absolute;
+    top: 200px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--dot);
+    border: 2px solid var(--surface);
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .marker:hover,
+  .marker.active {
+    transform: translate(-50%, -50%) scale(1.5);
+    background: var(--dot-active);
+    border-color: var(--text);
+    box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.15), 0 0 14px rgba(251, 191, 36, 0.35);
+    z-index: 20;
+  }
+
+  .marker.active { background: var(--dot-active); }
+
+  .marker-label {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 0.72rem;
+    color: var(--muted);
+    pointer-events: none;
+    opacity: 0.75;
+    transition: opacity 0.2s ease, color 0.2s ease;
+    border-left: 2px solid var(--dot);
+    padding-left: 6px;
+  }
+
+  .marker.active + .marker-label,
+  .marker:hover + .marker-label {
+    color: var(--text);
+    opacity: 1;
+    font-weight: 600;
+  }
+
+  /* Stem growing down toward the detail panel */
+  .connector {
+    position: absolute;
+    left: 50%;
+    top: 210px;
+    width: 1px;
+    height: 0;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 8;
+  }
+
+  /* Detail panel */
+  .panel {
+    position: fixed;
+    inset: auto 0 0 0;
+    width: 100%;
+    height: 46vh;
+    max-height: 420px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -8px 32px rgba(0,0,0,0.45);
+    display: flex;
+    flex-direction: column;
+    z-index: 60;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+    overflow: hidden;
+  }
+
+  .panel.open {
+    transform: translateY(0);
+  }
+
+  .panel::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--panel-accent, var(--accent)), transparent);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--panel-tint, rgba(251, 191, 36, 0)), transparent), rgba(19, 23, 32, 0.75);
+  }
+
+  .panel-title {
+    margin: 0;
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
+    margin-right: auto;
+  }
+
+  .panel-time {
+    margin-left: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--panel-accent, var(--accent));
+    font-weight: 600;
+    background: color-mix(in srgb, var(--panel-accent, var(--accent)) 12%, transparent);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid color-mix(in srgb, var(--panel-accent, var(--accent)) 30%, transparent);
+  }
+
+  .close-btn, .nav-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    line-height: 1;
+    margin-left: 0.5rem;
+    flex: none;
+  }
+
+  .nav-btn { font-size: 1.35rem; padding-bottom: 2px; }
+
+  .nav-btn:disabled {
+    opacity: 0.25;
+    cursor: default;
+  }
+
+  .nav-btn:not(:disabled):hover, .close-btn:hover {
+    color: var(--text);
+    border-color: var(--text);
+  }
+
+  .panel-body {
+    padding: 1.25rem 2rem;
+    overflow-y: auto;
+    flex: 1;
+    display: block;
+  }
+
+  /* Event image */
+  .event-media {
+    margin: 0 0 1rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+
+  .event-media img {
+    display: block;
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+    border-radius: 11px 11px 0 0;
+    filter: saturate(1.05);
+  }
+
+  .event-media figcaption {
+    margin: 0;
+    padding: 0.5rem 0.9rem 0.65rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.45;
+    border-top: 1px solid var(--border);
+    border-radius: 0 0 11px 11px;
+  }
+
+  /* kid card + story in two columns on wide screens */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 1rem 2rem;
+    align-items: start;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 720px) {
+    .two-col { grid-template-columns: 1fr; }
+    .event-media img { height: 150px; }
+  }
+
+  /* Reading-level cards */
+  .kid-card {
+    background: rgba(56, 189, 248, 0.05);
+    border: 1px solid rgba(56, 189, 248, 0.18);
+    border-radius: 12px;
+    padding: 0.9rem 1.1rem 1rem;
+  }
+
+  .kid-card h3, .story-cell h3, .detail-block h3 {
+    margin: 0 0 0.5rem;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--muted);
+  }
+
+  .kid-card p {
+    margin: 0 0 0.55rem;
+    color: #dbe2ee;
+    line-height: 1.6;
+    font-size: 0.98rem;
+  }
+
+  .kid-card p.fun {
+    margin: 0;
+    font-size: 0.86rem;
+    color: var(--accent);
+    line-height: 1.5;
+  }
+
+  .story-cell { min-width: 0; }
+
+  .story-cell p {
+    margin: 0;
+    color: #c7ccd8;
+    line-height: 1.65;
+    font-size: 0.95rem;
+  }
+
+  .panel-body p {
+    margin: 0;
+    color: #c7ccd8;
+    line-height: 1.65;
+    font-size: 0.95rem;
+  }
+
+  .panel-body p + p {
+    /* handled by gap */
+  }
+
+  .detail-block ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    color: #c7ccd8;
+    line-height: 1.7;
+    font-size: 0.9rem;
+  }
+
+  .detail-block li { margin-bottom: 0.35rem; }
+
+  .era-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    color: var(--era-color, var(--accent));
+    margin-bottom: 0.6rem;
+    grid-area: era;
+  }
+
+  .era-chip .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--era-color, var(--accent));
+    box-shadow: 0 0 8px var(--era-color, var(--accent));
+  }
+
+  /* Empty state */
+  .empty {
+    position: fixed;
+    inset: auto 0 0 0;
+    width: 100%;
+    height: 46vh;
+    max-height: 420px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-radius: 16px 16px 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    gap: 0.75rem;
+    z-index: 60;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+    text-align: center;
+    padding: 0 1.5rem;
+  }
+
+  .empty.visible { transform: translateY(0); }
+
+  .empty-icon { font-size: 2.5rem; opacity: 0.5; }
+
+  /* Scrollbar hide for track */
+  .track::-webkit-scrollbar { display: none; }
+  .track { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Mobile adjustments */
+  @media (max-width: 640px) {
+    .panel, .empty { width: 100vw; max-width: 100vw; }
+    h1 { font-size: 1.25rem; }
+    .track { height: 300px; }
+    .number-line { top: 170px; }
+    .marker { top: 170px; }
+    .connector { top: 180px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wash" id="wash" aria-hidden="true">
+  <div class="blob"></div>
+  <div class="blob"></div>
+  <div class="blob"></div>
+</div>
+
+<header>
+  <h1>Cosmic Timeline</h1>
+  <p class="sub">A horizontal number-line of events from the Big Bang to the modern era</p>
+</header>
+
+<div class="scroll-hint">
+  <span>Scroll or swipe horizontally to explore&nbsp;·&nbsp;Click or hover a marker for details</span>
+  <kbd>← →</kbd>
+  <div class="hint-spacer"></div>
+  <div class="controls">
+    <button class="seg on" id="mode-deep" type="button">Deep time</button>
+    <button class="seg" id="mode-human" type="button">Civilization</button>
+    <button class="seg" id="mode-powers" type="button" title="World superpowers and their large events">Powers</button>
+    <button class="seg" id="zoom-out" type="button" title="Zoom out (mouse wheel too)">➖</button>
+    <button class="seg" id="zoom-in" type="button" title="Zoom in (mouse wheel too)">➕</button>
+  </div>
+</div>
+
+<div class="legend" id="legend"></div>
+
+<div class="searchbar">
+  <input id="search-input" type="search" placeholder="Search events — try “moon”, “oxygen”, “Rome”…" autocomplete="off" spellcheck="false" />
+  <button id="quiz-btn" class="seg" type="button" title="Classroom quiz: which came first?">🎓 Quiz</button>
+  <button id="glossary-btn" class="seg" type="button" title="All words-to-know">🔤 Glossary</button>
+  <button id="tour-btn" class="seg" type="button" title="Step through the whole story automatically">▶ Take the tour</button>
+  <button id="print-btn" class="seg" type="button" title="Print a one-page handout for the selected event">🖨 Handout</button>
+  <div id="search-results" class="search-results" hidden></div>
+</div>
+
+<div class="glossary-modal" id="quiz-modal" hidden>
+  <div class="glossary-card quiz-card">
+    <button class="glossary-close" id="quiz-close" aria-label="Close quiz">✕</button>
+    <h2>🎓 Which came first?</h2>
+    <p class="gl-sub" id="quiz-progress">Question 1 of 5 · Score 0</p>
+    <div class="quiz-question" id="quiz-question"></div>
+    <div class="quiz-options" id="quiz-options"></div>
+    <div class="quiz-feedback" id="quiz-feedback" hidden></div>
+    <button class="seg quiz-next" id="quiz-next" type="button" hidden>Next question ▶</button>
+  </div>
+</div>
+
+<div class="glossary-modal" id="glossary-modal" hidden>
+  <div class="glossary-card">
+    <button class="glossary-close" id="glossary-close" aria-label="Close glossary">✕</button>
+    <h2>Words to know</h2>
+    <p class="gl-sub">The vocabulary of a 13.8-billion-year story — click any chip in a panel for its one-line meaning.</p>
+    <div id="glossary-list"></div>
+  </div>
+</div>
+
+<div id="print-sheet" hidden></div>
+
+<div class="viewport">
+  <div class="track" id="track" tabindex="0">
+    <div class="number-line"></div>
+    <div class="connectors" id="connectors"></div>
+    <div class="markers" id="markers"></div>
+  </div>
+</div>
+
+<div class="panel" id="panel">
+  <div class="panel-header">
+    <h2 class="panel-title" id="panel-title">Select an event</h2>
+    <span class="panel-time" id="panel-time"></span>
+    <button class="nav-btn" id="prev-btn" aria-label="Previous event" title="Previous event (←)">‹</button>
+    <button class="nav-btn" id="next-btn" aria-label="Next event" title="Next event (→)">›</button>
+    <button class="close-btn" id="close-btn" aria-label="Close details">✕</button>
+  </div>
+  <div class="panel-body" id="panel-body"></div>
+</div>
+
+<div class="empty" id="empty">
+  <div class="empty-icon">✦</div>
+  <div>Click or hover a marker on the timeline to explore details</div>
+</div>
+
+<script src="./timeline-core.js"></script>
+<script>
+/* -------------------------------------------------------------
+   Data: milestones from the Big Bang to the modern era.
+   yearsAgo: years before present (present = 0).
+   era: broad cosmic/geological/human era.
+   ------------------------------------------------------------- */
+const { MILESTONES, ERA_COLORS, formatTime, formatShort, MAX_YEARS, HUMAN_MAX, LEARN_MORE, GLOSSARY, ERA_INFO } = TimelineCore;
+
+function eventColor(i) { return TimelineCore.eventColor(i); }
+function eventColorAlpha(i, a) { return TimelineCore.eventColorAlpha(i, a); }
+
+
+
+/* -------------------------------------------------------------
+   Images for each event (Wikimedia Commons, hotlinked with
+   graceful fallback if offline).
+   ------------------------------------------------------------- */
+/* -------------------------------------------------------------
+   Images for each event (Wikimedia Commons, hotlinked via
+   Special:FilePath so any size works, with graceful fallback
+   if offline).
+   ------------------------------------------------------------- */
+const COMMONS_FILE = (name) =>
+  "https://commons.wikimedia.org/wiki/Special:FilePath/" + encodeURIComponent(name) + "?width=700";
+
+const EVENT_MEDIA = {
+  "The Big Bang": {
+    caption: "The cosmic microwave background — the oldest light in the universe, mapped across the whole sky (ESA/Planck)",
+    file: "CMB_Timeline75.jpg",
+    url: COMMONS_FILE("CMB_Timeline75.jpg"),
+  },
+  "First Stars Ignite": {
+    caption: "The Hubble Ultra Deep Field: a long exposure of mostly empty sky revealing thousands of galaxies (NASA/ESA)",
+    file: "Hubble_ultra_deep_field.jpg",
+    url: COMMONS_FILE("Hubble_ultra_deep_field.jpg"),
+  },
+  "Milky Way Forms": {
+    caption: "The Milky Way arcing over the Black Rock Desert, Nevada",
+    file: "Milky_Way_Night_Sky_Black_Rock_Desert_Nevada.jpg",
+    url: COMMONS_FILE("Milky_Way_Night_Sky_Black_Rock_Desert_Nevada.jpg"),
+  },
+  "Solar System Forms": {
+    caption: "The Sun and planets of our solar system to scale",
+    file: "Solar_System_true_color.jpg",
+    url: COMMONS_FILE("Solar_System_true_color.jpg"),
+  },
+  "Earth Forms": {
+    caption: "Blue Marble — Earth photographed from Apollo 17, 1972 (NASA)",
+    file: "The_Earth_seen_from_Apollo_17.jpg",
+    url: COMMONS_FILE("The_Earth_seen_from_Apollo_17.jpg"),
+  },
+  "First Life Appears": {
+    caption: "Living stromatolites in Shark Bay, Australia — built by microbes much like the first life on Earth",
+    file: "Stromatolites_in_Sharkbay.jpg",
+    url: COMMONS_FILE("Stromatolites_in_Sharkbay.jpg"),
+  },
+  "Oxygenation of the Atmosphere": {
+    caption: "Banded iron formation rock — layered iron rusted out of ancient oceans by the first oxygen",
+    file: "Banded_iron_formation.jpg",
+    url: COMMONS_FILE("Banded_iron_formation.jpg"),
+  },
+  "First Complex Life": {
+    caption: "Fossil of Anomalocaris, a metre-long predator of the Cambrian seas",
+    file: "Anomalocaris_canadensis.jpg",
+    url: COMMONS_FILE("Anomalocaris_canadensis.jpg"),
+  },
+  "Dinosaurs Appear": {
+    caption: "The holotype Tyrannosaurus rex skeleton at the American Museum of Natural History",
+    file: "Tyrannosaurus_Rex_Holotype.jpg",
+    url: COMMONS_FILE("Tyrannosaurus_Rex_Holotype.jpg"),
+  },
+  "Dinosaur Extinction": {
+    caption: "The K-Pg boundary — fossil clay layer marking the asteroid impact, seen as a thin white line",
+    file: "Thin_white_line = KT (now K-Pg) boundary (5090097984).jpg",
+    url: COMMONS_FILE("Thin_white_line = KT (now K-Pg) boundary (5090097984).jpg"),
+  },
+  "First Hominids": {
+    caption: "Lucy (AL 288-1), a 3.2-million-year-old hominid skeleton on display in Ethiopia",
+    file: "Lucy_blackbg.jpg",
+    url: COMMONS_FILE("Lucy_blackbg.jpg"),
+  },
+  "Homo sapiens": {
+    caption: "Jebel Irhoud 1 — a nearly complete early Homo sapiens skull from Morocco, ~315,000 years old",
+    file: "Jebel_Irhoud-1_NMNH.jpg",
+    url: COMMONS_FILE("Jebel_Irhoud-1_NMNH.jpg"),
+  },
+  "Agriculture Begins": {
+    caption: "Göbekli Tepe, Turkey — carved stone pillars raised by hunter-gatherers over 11,000 years ago",
+    file: "Göbekli_Tepe.jpg",
+    url: COMMONS_FILE("Göbekli_Tepe.jpg"),
+  },
+  "Writing Invented": {
+    caption: "Cuneiform wedge-writing pressed into clay, the world first script",
+    file: "Cuneiform_script.jpg",
+    url: COMMONS_FILE("Cuneiform_script.jpg"),
+  },
+  "Great Pyramid of Giza": {
+    caption: "The pyramids of Giza seen from the desert plateau",
+    file: "All_Gizah_Pyramids.jpg",
+    url: COMMONS_FILE("All_Gizah_Pyramids.jpg"),
+  },
+  "Roman Empire": {
+    caption: "The Colosseum in Rome — the empire largest amphitheatre",
+    file: "Colosseo_2020.jpg",
+    url: COMMONS_FILE("Colosseo_2020.jpg"),
+  },
+  "Fall of Rome / Middle Ages": {
+    caption: "The nave of Canterbury Cathedral — Gothic architecture of the Middle Ages",
+    file: "Canterbury Cathedral Nave 1, Kent, UK - Diliff.jpg",
+    url: COMMONS_FILE("Canterbury Cathedral Nave 1, Kent, UK - Diliff.jpg"),
+  },
+  "Printing Press": {
+    caption: "A reconstruction of Gutenberg movable-type press",
+    file: "Gutenberg_press.png",
+    url: COMMONS_FILE("Gutenberg_press.png"),
+  },
+  "Industrial Revolution": {
+    caption: "Power-loom weaving in 1835 — textile mills like this one drove the Industrial Revolution",
+    file: "Powerloom_weaving_in_1835.jpg",
+    url: COMMONS_FILE("Powerloom_weaving_in_1835.jpg"),
+  },
+  "First Powered Flight": {
+    caption: "The Wright Flyer at Kitty Hawk, December 17, 1903 — the moment the machine left the ground",
+    file: "First_flight2.jpg",
+    url: COMMONS_FILE("First_flight2.jpg"),
+  },
+  "Moon Landing": {
+    caption: "Buzz Aldrin on the Moon, photographed by Neil Armstrong, July 1969 (NASA)",
+    file: "Aldrin_Apollo_11_original.jpg",
+    url: COMMONS_FILE("Aldrin_Apollo_11_original.jpg"),
+  },
+  "Internet & World Wide Web": {
+    caption: "A globe of the modern internet — every dot a network, every thread a data connection",
+    file: "Internet_map_1024_-_transparent,_inverted.png",
+    url: COMMONS_FILE("Internet_map_1024_-_transparent,_inverted.png"),
+  },
+  "The Modern Era": {
+    caption: "Blue Marble 2016 — our present-day Earth seen in full daylight (NASA/NOAA)",
+    file: "The_Blue_Marble_(remastered).jpg",
+    url: COMMONS_FILE("The_Blue_Marble_(remastered).jpg"),
+  },
+  "Quasars Light Up": {
+    caption: "Brilliant beacons of the quasar era — the brightest objects in the young universe",
+    url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/38/Artist%27s_rendering_ULAS_J1120%2B0641.jpg/3840px-Artist%27s_rendering_ULAS_J1120%2B0641.jpg",
+  },
+  "Cosmic Noon": {
+    caption: "A star-forming nebula — the universe at 'cosmic noon', building stars ten times faster than today",
+    url: "https://upload.wikimedia.org/wikipedia/commons/4/46/PIA23865-W51Nebula-StarFactory-20200825.jpg",
+  },
+  "The Cosmic Web Forms": {
+    caption: "A map of the large-scale universe — galaxies clustered along the threads of the cosmic web",
+    url: "https://upload.wikimedia.org/wikipedia/commons/9/98/Observable_Universe_with_Measurements_01.png",
+  },
+  "Dark Energy Takes Over": {
+    caption: "Distant supernovae revealed the universe's expansion is accelerating — evidence for dark energy",
+    url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ed/WMAP_2012.png/3840px-WMAP_2012.png",
+  },
+  "The Moon Forms": {
+    caption: "Artist's impression of the giant impact that splashed debris into orbit — the birth of the Moon",
+    url: "https://upload.wikimedia.org/wikipedia/commons/5/57/Cara-oculta-luna.jpg",
+  },
+  "The First Oceans": {
+    caption: "Artist's impression of the early Earth, where the first oceans condensed from a cooling steam atmosphere",
+    url: "https://upload.wikimedia.org/wikipedia/commons/0/03/Hadean.png",
+  },
+  "Late Heavy Bombardment": {
+    caption: "The crater-pocked lunar surface — a record of the solar system's heavy asteroid blizzard",
+    url: "https://upload.wikimedia.org/wikipedia/commons/8/8f/Precambrian_Evolution_of_Life.png",
+  },
+  "Photosynthesis Invented": {
+    caption: "Cyanobacteria — the microbes that invented oxygenic photosynthesis and changed the planet forever",
+    url: "https://upload.wikimedia.org/wikipedia/commons/1/15/CSIRO_ScienceImage_4203_A_bluegreen_algae_species_Cylindrospermum_sp_under_magnification.jpg",
+  },
+  "Complex Cells (Eukaryotes)": {
+    caption: "A unicellular eukaryote: one of the complex 'engulfing' cells born of the endosymbiotic partnership",
+    url: "https://upload.wikimedia.org/wikipedia/commons/f/ff/Amoeba_collage.jpg",
+  },
+  "Cells Begin Pairing Up (Sex Evolves)": {
+    caption: "Cell division with gene-crossover — the machinery of recombination that powers sexual reproduction",
+    url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/96/Meiosis_Overview_new.svg/960px-Meiosis_Overview_new.svg.png",
+  },
+  "Snowball Earth": {
+    caption: "Glacial deposits near the equator — evidence that ice reached the tropics more than once",
+    url: "https://upload.wikimedia.org/wikipedia/commons/9/98/Snowball_Huronian.jpg",
+  },
+  "Plants Cover the Land": {
+    caption: "Early land plants like ferns spread across bare continents, building the first soils",
+    url: "https://upload.wikimedia.org/wikipedia/commons/4/47/The_ferns_of_Great_Britain%2C_and_their_allies_the_club-mosses%2C_pepperworts%2C_and_horsetails_%28Pl._2%29_%288515393495%29.jpg",
+  },
+  "Fire in Our Hands": {
+    caption: "Fire meant warmth, light and safety — and cooked food may have powered our growing brains",
+    url: "https://upload.wikimedia.org/wikipedia/commons/0/0f/Campfire_Pinecone.png",
+  },
+  "The Wheel Turns": {
+    caption: "One of the earliest known wheels — a solid wooden disc built up from planks",
+    url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/Landesmuseum_W%C3%BCrttemberg_Kelten_011.4.jpg/3840px-Landesmuseum_W%C3%BCrttemberg_Kelten_011.4.jpg",
+  },
+  "The Alphabet": {
+    caption: "An inscribed letter-scheme — the Phoenician letter names that became our A-B-C",
+    url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/24/Phoenician_alphabet.svg/960px-Phoenician_alphabet.svg.png",
+  },
+  "Two Worlds Collide": {
+    caption: "A 16th-century map of the Americas — the moment two world biospheres reconnected",
+    url: "https://upload.wikimedia.org/wikipedia/commons/3/34/VegCorn_%28cropped%29.jpg",
+  },
+  "Newton Rewrites the Sky": {
+    caption: "Isaac Newton — whose Principia showed one set of laws rules apples and planets alike",
+    url: "https://upload.wikimedia.org/wikipedia/commons/f/f7/Portrait_of_Sir_Isaac_Newton%2C_1689_%28brightened%29.jpg",
+  },
+  "Vaccines Discovered": {
+    caption: "A vial of vaccine — the technology that has saved hundreds of millions of lives since 1796",
+    url: "https://upload.wikimedia.org/wikipedia/commons/3/30/Young_girl_about_to_receive_a_vaccine_in_her_upper_arm_%2848545990252%29.jpg",
+  },
+  "The Transistor": {
+    caption: "The first transistors — thumb-sized devices that shrank into billions per chip",
+    url: "https://upload.wikimedia.org/wikipedia/commons/e/e1/Transbauformen.jpg",
+  },
+  "The DNA Double Helix": {
+    caption: "A DNA double-helix model — the molecule whose code we learned to read and edit",
+    url: "https://upload.wikimedia.org/wikipedia/commons/4/4c/DNA_Structure%2BKey%2BLabelled.pn_NoBB.png",
+  },
+  "Smartphones Change Everything": {
+    caption: "A modern smartphone: more computing power than the Apollo guidance computer, in a pocket",
+    url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/Wikipedia_homepage_on_a_large_Android_phone%2C_2015-04-16.jpg/3840px-Wikipedia_homepage_on_a_large_Android_phone%2C_2015-04-16.jpg",
+  },
+  "Fish Walk onto Land": {
+    caption: "Tiktaalik roseae — the famous 'fishapod' whose fins bore the bones of your arms",
+    url: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Tiktaalik_Chicago.JPG",
+  },
+  "The Coal Forests": {
+    caption: "A giant club-moss tree of the Carboniferous coal swamps — several storeys tall",
+    url: "https://upload.wikimedia.org/wikipedia/commons/d/da/Lepidodendron_reconstrucci%C3%B3n.jpg",
+  },
+  "The Great Dying": {
+    caption: "Siberian volcanic rock at the Permian–Triassic boundary — the 'smoking gun'",
+    url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/Extinction_intensity.svg/960px-Extinction_intensity.svg.png",
+  },
+  "Whales Return to the Sea": {
+    caption: "A blue whale — the largest animal ever, descended from small hoofed land mammals",
+    url: "https://upload.wikimedia.org/wikipedia/commons/1/1c/Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg",
+  },
+  "The First Apes": {
+    caption: "An ape in the canopy — our ancestors became the first tail-less, tree-swinging primates",
+    url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/86/013_Alpha_male_chimpanzee_at_Kibale_forest_National_Park_Photo_by_Giles_Laurent.jpg/3840px-013_Alpha_male_chimpanzee_at_Kibale_forest_National_Park_Photo_by_Giles_Laurent.jpg",
+  },
+  "Out of Africa": {
+    caption: "The migration routes by which modern humans populated the entire planet",
+    url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/27/Spreading_homo_sapiens_la.svg/1920px-Spreading_homo_sapiens_la.svg.png",
+  },
+  "Democracy is Born": {
+    caption: "A marble carving of Athenian democracy in action — citizens voting in the assembly",
+    url: "https://upload.wikimedia.org/wikipedia/commons/f/f1/Discurso_funebre_pericles.PNG",
+  },
+  "The Islamic Golden Age": {
+    caption: "A brass astrolabe — an ancient computer for star navigation, prayer times and mathematics",
+    url: "https://upload.wikimedia.org/wikipedia/commons/d/d5/Khalili_Collection_Islamic_Art_sci_0430_back.jpg",
+  },
+  "Electricity Lights Up the World": {
+    caption: "Early electric lighting — the night sky over our cities changed forever",
+    url: "https://upload.wikimedia.org/wikipedia/commons/7/7b/Light-bulbs.jpg",
+  },
+  "Antibiotics Discovered": {
+    caption: "Penicillium mould — the accidental discovery that defeated killer bacterial diseases",
+    url: "https://upload.wikimedia.org/wikipedia/commons/f/fe/Penicillium_Pengo.jpg",
+  },
+  "The Human Genome Mapped": {
+    caption: "Human chromosomes — the Human Genome Project read our complete genetic blueprint",
+    url: "https://upload.wikimedia.org/wikipedia/commons/f/f3/Logo_HGP.jpg",
+  },
+  "Creation": {
+    caption: "The Creation of Adam — Michelangelo's Sistine Chapel fresco of the Genesis story",
+    url: "https://upload.wikimedia.org/wikipedia/commons/c/c7/Tissot_The_Creation.jpg",
+  },
+  "The Great Flood": {
+    caption: "Gustave Doré's engraving of the Dove Returning to Noah's Ark",
+    url: "https://upload.wikimedia.org/wikipedia/commons/5/52/Le_d%C3%A9luge_-_mus%C3%A9e_de_beaux_arts_de_Nantes_20091017.jpg",
+  },
+  "Abraham's Journey": {
+    caption: "Abraham the wanderer — the patriarch honoured by three world religions",
+    url: "https://upload.wikimedia.org/wikipedia/commons/4/42/Guercino_Abramo_ripudia_Agar_%28cropped_2%29.jpg",
+  },
+  "Exodus & Mount Sinai": {
+    caption: "The crossing scene — the Exodus story as told for over three millennia",
+    url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6e/David_Roberts-IsraelitesLeavingEgypt_1828.jpg/3840px-David_Roberts-IsraelitesLeavingEgypt_1828.jpg",
+  },
+  "King David Reigns": {
+    caption: "King David — shepherd, giant-slayer, poet and the most famous king of Israel",
+    url: "https://upload.wikimedia.org/wikipedia/commons/9/94/King_David%2C_the_King_of_Israel.jpg",
+  },
+  "Solomon's Temple": {
+    caption: "An engraving of the First Temple in Jerusalem, as described in 1 Kings",
+    url: "https://upload.wikimedia.org/wikipedia/commons/8/88/Francois_Vatable%2C_reconstructie_van_de_tempel_van_Salomo_%28detail%29.jpg",
+  },
+  "The Babylonian Exile": {
+    caption: "The exile of Judah to Babylon — where the Jewish community rebuilt itself around scripture",
+    url: "https://upload.wikimedia.org/wikipedia/commons/8/8f/Tissot_The_Flight_of_the_Prisoners.jpg",
+  },
+  "The Return & Second Temple": {
+    caption: "The Second Temple in Jerusalem — modest at first, later expanded by Herod into one of the ancient world's marvels",
+    url: "https://upload.wikimedia.org/wikipedia/commons/c/cd/Second_Temple.jpg",
+  },
+  "The Birth of Jesus": {
+    caption: "The Nativity — the Christmas story told around the world each December",
+    url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/Adoration_of_the_sheperds_-_Matthias_Stomer.jpg/3840px-Adoration_of_the_sheperds_-_Matthias_Stomer.jpg",
+  },
+  "The Crucifixion & Resurrection": {
+    caption: "The Crucifixion — the event at the centre of Christian belief",
+    url: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Cristo_crucificado.jpg",
+  },
+  "The Second Temple Falls": {
+    caption: "The Arch of Titus in Rome — showing the Temple's menorah carried away in triumph",
+    url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/00/%28Venice%29_La_distruzione_del_tempio_di_Gerusalemme_-Francesco_Hayez_-_gallerie_Accademia_Venice.jpg/3840px-%28Venice%29_La_distruzione_del_tempio_di_Gerusalemme_-Francesco_Hayez_-_gallerie_Accademia_Venice.jpg",
+  },
+  "Menes Unifies Egypt": {
+    caption: "The Narmer Palette — carved stone celebrating the unification of Upper and Lower Egypt",
+    url: "https://upload.wikimedia.org/wikipedia/commons/d/da/Narmer_palette_%28obverse%29_%28cropped%29.jpg",
+  },
+  "Hammurabi's Code": {
+    caption: "The black basalt stele of Hammurabi — 282 laws carved for every citizen to read",
+    url: "https://upload.wikimedia.org/wikipedia/commons/6/64/P1050763_Louvre_code_Hammurabi_face_rwk.JPG",
+  },
+  "The Neo-Assyrian Empire": {
+    caption: "An Assyrian palace relief — war and hunting carved in stone as royal propaganda",
+    url: "https://upload.wikimedia.org/wikipedia/commons/c/c1/Map_of_Assyria.png",
+  },
+  "Darius & the Persian Empire": {
+    caption: "Persepolis — the ceremonial capital of the Persian superpower",
+    url: "https://upload.wikimedia.org/wikipedia/commons/5/5f/Achaemenid_Empire_500_BCE.jpg",
+  },
+  "Alexander the Great": {
+    caption: "Alexander depicted in the famous 'Alexander Mosaic' — hunting the Persian king",
+    url: "https://upload.wikimedia.org/wikipedia/commons/4/49/Alexander_Mosaic_detail_of_Alexander_the_Great_%283x4_cropped%29.jpg",
+  },
+  "The Caliphates Spread": {
+    caption: "A caliphal gold dinar — the currency that linked Spain to Central Asia",
+    url: "https://upload.wikimedia.org/wikipedia/commons/d/df/Mohammad_adil-Rashidun-empire-at-its-peak-close.PNG",
+  },
+  "The Mongol Empire": {
+    caption: "The Mongol Empire at its height — the largest contiguous land empire ever conquered",
+    url: "https://upload.wikimedia.org/wikipedia/commons/6/62/Expansion_of_the_Mongol_Empire_1206%E2%80%931294.gif",
+  },
+  "The British Empire": {
+    caption: "The 1910 map of the British Empire — a quarter of the world in one colour",
+    url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f2/Flag_of_Great_Britain_%281707%E2%80%931800%29.svg/1280px-Flag_of_Great_Britain_%281707%E2%80%931800%29.svg.png",
+  },
+  "The World Wars": {
+    caption: "The mushroom cloud over Hiroshima — the war's devastating ending",
+    url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/54/Atomic_bombing_of_Japan.jpg/3840px-Atomic_bombing_of_Japan.jpg",
+  },
+};
+
+/* -------------------------------------------------------------
+   Log-scale positioning.
+   Map yearsAgo (0 to 13.8e9) onto the track width.
+   We use log10(yearsAgo + 1) so human history isn't crushed
+   into an invisible sliver at the right edge.
+   ------------------------------------------------------------- */
+let scaleMode = "deep"; // "deep" (all 13.8 Bya, log) | "human" (farming → today, log)
+
+function fracFor(i) {
+  const m = MILESTONES[i];
+  if (scaleMode === "human") {
+    return TimelineCore.visibleInCivilization(m) ? TimelineCore.fracFor(m.yearsAgo, HUMAN_MAX) : null;
+  }
+  if (scaleMode === "powers") {
+    if (m.era !== "World Powers") return null; // only superpower events
+    const oldest = Math.max(...MILESTONES.filter((mm) => mm.era === "World Powers").map((mm) => mm.yearsAgo));
+    return TimelineCore.fracFor(m.yearsAgo, oldest); // scale to the Powers range itself
+  }
+  return TimelineCore.fracFor(m.yearsAgo, MAX_YEARS);
+}
+
+
+
+/* -------------------------------------------------------------
+   Format times for labels
+   ------------------------------------------------------------- */
+
+/* -------------------------------------------------------------
+   Render markers
+   ------------------------------------------------------------- */
+const markersContainer = document.getElementById("markers");
+const connectorsContainer = document.getElementById("connectors");
+const track = document.getElementById("track");
+
+MILESTONES.forEach((m, i) => {
+  const frac = fracFor(i);
+
+  const color = eventColor(i);
+  const colorSoft = eventColorAlpha(i, 0.3);
+
+  const marker = document.createElement("div");
+  marker.className = "marker";
+  marker.setAttribute("aria-label", `${m.title}, ${formatTime(m.yearsAgo)}`);
+  marker.setAttribute("role", "button");
+  marker.tabIndex = 0;
+  marker.style.left = `${(frac * 100).toFixed(4)}%`;
+  marker.style.background = color;
+  marker.style.boxShadow = `0 0 0 3px ${colorSoft}`;
+  marker.dataset.index = i;
+  marker.dataset.era = m.era;
+
+  const label = document.createElement("div");
+  label.className = "marker-label";
+  label.textContent = `${formatShort(m.yearsAgo)} · ${m.title}`;
+  label.style.left = `${(frac * 100).toFixed(4)}%`;
+  label.style.borderLeft = `2px solid ${color}`;
+  label.style.paddingLeft = "6px";
+
+  const connector = document.createElement("div");
+  connector.className = "connector";
+  connector.style.left = `${(frac * 100).toFixed(4)}%`;
+  connector.style.background = eventColorAlpha(i, 0.33);
+
+  markersContainer.appendChild(marker);
+  markersContainer.appendChild(label);
+  connectorsContainer.appendChild(connector);
+});
+
+/* Store positions so we can sync connectors */
+const markerEls = Array.from(markersContainer.querySelectorAll(".marker"));
+const connectorEls = Array.from(connectorsContainer.querySelectorAll(".connector"));
+const labelEls = Array.from(markersContainer.querySelectorAll(".marker-label"));
+
+/* -------------------------------------------------------------
+   Staggered label layout.
+   Labels sit in tiers above the number line; when two labels
+   would overlap horizontally the lower one moves to the next
+   tier up, so nothing is jumbled together.
+   ------------------------------------------------------------- */
+function layoutLabels() {
+  const mobile = window.innerWidth <= 640;
+  const lineTop = mobile ? 170 : 200;
+  const tierH = mobile ? 20 : 22;
+  const trackRect = track.getBoundingClientRect();
+  const rows = [];
+
+  const items = Array.from(labelEls)
+    .filter((el) => el.style.display !== "none")
+    .map((el) => {
+      el.style.top = `${lineTop - 10 - tierH}px`; // provisional
+      const r = el.getBoundingClientRect();
+      return { el, x: r.left - trackRect.left, w: r.width };
+    });
+
+  items.sort((a, b) => a.x - b.x);
+
+  const tiers = TimelineCore.assignTiers(items, 8);
+  items.forEach(function (it, idx) { it.tier = tiers[idx] ?? 0; });
+
+  items.forEach((it) => {
+    it.el.style.top = `${lineTop - 10 - (it.tier + 1) * tierH}px`;
+  });
+}
+
+layoutLabels();
+
+/* Re-stagger when the window (and thus the vw-scaled track) changes */
+let resizeRaf = null;
+window.addEventListener("resize", () => {
+  if (resizeRaf) cancelAnimationFrame(resizeRaf);
+  resizeRaf = requestAnimationFrame(() => {
+    layoutLabels();
+    updateWash();
+  });
+});
+
+/* -------------------------------------------------------------
+   Context wash — background colored by the events in view.
+   ------------------------------------------------------------- */
+const washBlobs = Array.from(document.querySelectorAll(".wash .blob"));
+
+function updateWash() {
+  const vp = viewportEl;
+  if (!vp) return;
+  const vr = vp.getBoundingClientRect();
+  const cx = vr.left + vr.width / 2;
+
+  const nearest = markerEls
+    .filter((el) => el.style.display !== "none")
+    .map((el) => {
+      const r = el.getBoundingClientRect();
+      return { el, i: Number(el.dataset.index), d: Math.abs(r.left + r.width / 2 - cx) };
+    })
+    .sort((a, b) => a.d - b.d)
+    .slice(0, washBlobs.length);
+
+  washBlobs.forEach((blob, k) => {
+    const it = nearest[k];
+    if (!it) return;
+    const r = it.el.getBoundingClientRect();
+    blob.style.left = `${r.left + window.scrollX - window.innerWidth * 0.28}px`;
+    blob.style.top = `${r.top - window.innerHeight * 0.18}px`;
+    blob.style.background = eventColorAlpha(it.i, 0.16 - k * 0.03);
+  });
+}
+
+const viewportEl = document.querySelector(".viewport");
+viewportEl.addEventListener("scroll", () => {
+  if (washRaf) cancelAnimationFrame(washRaf);
+  washRaf = requestAnimationFrame(updateWash);
+});
+let washRaf = null;
+
+updateWash();
+
+/* -------------------------------------------------------------
+   Panel / detail logic
+   ------------------------------------------------------------- */
+const panel = document.getElementById("panel");
+const empty = document.getElementById("empty");
+const panelTitle = document.getElementById("panel-title");
+const panelTime = document.getElementById("panel-time");
+const panelBody = document.getElementById("panel-body");
+const closeBtn = document.getElementById("close-btn");
+
+let pinnedIndex = null;   // clicked / selected marker (stays open)
+let hoveredIndex = null;  // marker currently hovered
+let closeTimer = null;
+
+function setMarkerActive(index) {
+  markerEls.forEach((el, i) => {
+    const color = eventColor(i);
+    el.classList.toggle("active", i === index);
+    if (i === index) {
+      el.style.background = color;
+      el.style.boxShadow = `0 0 0 5px ${eventColorAlpha(i, 0.34)}, 0 0 18px ${eventColorAlpha(i, 0.55)}`;
+      el.style.transform = "translate(-50%, -50%) scale(1.5)";
+    } else {
+      el.style.boxShadow = `0 0 0 3px ${eventColorAlpha(i, 0.3)}`;
+      el.style.transform = "translate(-50%, -50%)";
+    }
+  });
+  connectorEls.forEach((el, i) => {
+    el.classList.toggle("active", i === index);
+    if (i === index) {
+      el.style.background = eventColor(i);
+      el.style.height = "90px";
+    } else {
+      el.style.background = eventColorAlpha(i, 0.33);
+      el.style.height = "0";
+    }
+  });
+}
+
+function renderDetail(index) {
+  const m = MILESTONES[index];
+  panelTitle.textContent = m.title;
+  panelTime.textContent = formatTime(m.yearsAgo);
+
+  /* Era-tinted header chrome */
+  const tint = eventColor(index);
+  panel.style.setProperty("--panel-accent", tint);
+  panel.style.setProperty("--panel-tint", eventColorAlpha(index, 0.1));
+  if (typeof prevBtn !== "undefined" && prevBtn) {
+    prevBtn.disabled = index <= 0;
+    nextBtn.disabled = index >= MILESTONES.length - 1;
+  }
+
+  const color = eventColor(index);
+    const era = document.createElement("div");
+  era.className = "era-chip";
+  era.style.setProperty("--era-color", color);
+  era.innerHTML = `<span class="dot"></span>${m.era}`;
+
+  /* For young explorers — pitched at a 6-year-old */
+  const kid = document.createElement("div");
+  kid.className = "kid-card";
+  const kidH = document.createElement("h3");
+  kidH.textContent = "🌟 For young explorers";
+  const kidP = document.createElement("p");
+  kidP.textContent = m.kid;
+  const funP = document.createElement("p");
+  funP.className = "fun";
+  funP.textContent = `💡 Did you know? ${m.fun}`;
+  kid.appendChild(kidH);
+  kid.appendChild(kidP);
+  kid.appendChild(funP);
+
+  /* The bigger story — general audience */
+  const story = document.createElement("div");
+  story.className = "story-cell";
+  const storyH = document.createElement("h3");
+  storyH.textContent = "📖 The bigger story";
+  const storyP = document.createElement("p");
+  storyP.textContent = m.summary;
+  story.appendChild(storyH);
+  story.appendChild(storyP);
+
+  const twoCol = document.createElement("div");
+  twoCol.className = "two-col";
+  twoCol.appendChild(kid);
+  twoCol.appendChild(story);
+
+  /* Go deeper — expert level: numbers, mechanisms, open questions */
+  const deep = document.createElement("div");
+  deep.className = "detail-block";
+  const deepH = document.createElement("h3");
+  deepH.textContent = "🎓 Go deeper (nerd-level)";
+  const ul = document.createElement("ul");
+  m.deep.forEach((d) => {
+    const li = document.createElement("li");
+    li.textContent = d;
+    ul.appendChild(li);
+  });
+  deep.appendChild(deepH);
+  deep.appendChild(ul);
+
+  /* Words to know: glossary terms used in this event's text */
+  const glossary = document.createElement("div");
+  glossary.className = "glossary-chips";
+  const glTitle = document.createElement("span");
+  glTitle.className = "gl-title";
+  glTitle.textContent = "🔤 Words to know";
+  glossary.appendChild(glTitle);
+  const haystack = (m.kid + " " + m.summary + " " + m.deep.join(" ")).toLowerCase();
+  const matches = TimelineCore.glossaryTermsFor(haystack);
+  matches.forEach(function (pair) {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "glossary-chip";
+    chip.textContent = pair.term;
+    chip.title = pair.def;
+    chip.dataset.term = pair.term;
+    glossary.appendChild(chip);
+  });
+  if (matches.length === 0) {
+    glTitle.textContent = "";
+    glossary.style.display = "none";
+  } else {
+    const moreChip = document.createElement("button");
+    moreChip.type = "button";
+    moreChip.className = "glossary-chip";
+    moreChip.textContent = "see all terms";
+    moreChip.id = "glossary-open-inline";
+    glossary.appendChild(moreChip);
+  }
+
+  panelBody.innerHTML = "";
+
+  const media = EVENT_MEDIA[m.title];
+  if (media && media.url) {
+    const figure = document.createElement("figure");
+    figure.className = "event-media";
+    const img = document.createElement("img");
+    img.src = media.url || COMMONS_FILE(media.file);
+    img.referrerPolicy = "no-referrer";
+    img.alt = media.caption || m.title;
+    img.loading = "lazy";
+    img.addEventListener("error", () => { figure.style.display = "none"; });
+    const caption = document.createElement("figcaption");
+    caption.textContent = `${media.caption} · Image: Wikimedia Commons`;
+    figure.appendChild(img);
+    figure.appendChild(caption);
+    panelBody.appendChild(figure);
+  }
+  panelBody.appendChild(era);
+  panelBody.appendChild(twoCol);
+  panelBody.appendChild(deep);
+  panelBody.appendChild(glossary);
+
+  if (LEARN_MORE[m.title]) {
+    const more = document.createElement("a");
+    more.className = "learn-more";
+    more.href = LEARN_MORE[m.title];
+    more.target = "_blank";
+    more.rel = "noopener";
+    more.textContent = "🔗 Read more: " + m.title + " · Wikipedia";
+    panelBody.appendChild(more);
+  }
+}
+
+function displayedIndex() {
+  return hoveredIndex !== null ? hoveredIndex : pinnedIndex;
+}
+
+function updatePanel() {
+  const idx = displayedIndex();
+  if (idx === null) {
+    panel.classList.remove("open");
+    setMarkerActive(null);
+    return;
+  }
+  panel.classList.add("open");
+  setMarkerActive(idx);
+  renderDetail(idx);
+  if (pinnedIndex !== null) updateHash();
+}
+
+function scheduleClose() {
+  if (closeTimer) clearTimeout(closeTimer);
+  closeTimer = setTimeout(() => {
+    if (pinnedIndex === null && hoveredIndex === null) {
+      updatePanel();
+    }
+  }, 120);
+}
+
+function cancelClose() {
+  if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+}
+
+/* Marker interactions */
+markerEls.forEach((el, i) => {
+  el.addEventListener("mouseenter", () => {
+    cancelClose();
+    hoveredIndex = i;
+    updatePanel();
+  });
+  el.addEventListener("mouseleave", () => {
+    hoveredIndex = null;
+    if (pinnedIndex === null) scheduleClose();
+  });
+  el.addEventListener("focus", () => {
+    hoveredIndex = i;
+    updatePanel();
+  });
+  el.addEventListener("blur", () => {
+    hoveredIndex = null;
+    if (pinnedIndex === null) scheduleClose();
+  });
+  el.addEventListener("click", (e) => {
+    e.stopPropagation();
+    cancelClose();
+    pinnedIndex = (pinnedIndex === i) ? null : i;
+    hoveredIndex = null;
+    updatePanel();
+  });
+});
+
+/* Keep panel open while the cursor is over it */
+panel.addEventListener("mouseenter", cancelClose);
+panel.addEventListener("mouseleave", () => {
+  if (pinnedIndex === null) scheduleClose();
+});
+
+/* Panel click should not deselect */
+panel.addEventListener("click", (e) => e.stopPropagation());
+
+/* Track click: deselect when clicking the track background */
+track.addEventListener("click", (e) => {
+  const t = e.target;
+  if (t === track || t.classList.contains("number-line") || t.classList.contains("axis") || t.classList.contains("tick-label")) {
+    pinnedIndex = null;
+    hoveredIndex = null;
+    cancelClose();
+    updatePanel();
+  }
+});
+
+closeBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  pinnedIndex = null;
+  hoveredIndex = null;
+  cancelClose();
+  updatePanel();
+});
+
+/* Keyboard */
+track.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+    e.preventDefault();
+    const base = hoveredIndex !== null ? hoveredIndex : (pinnedIndex !== null ? pinnedIndex : 0);
+    let next = base + (e.key === "ArrowLeft" ? -1 : 1);
+    next = Math.max(0, Math.min(MILESTONES.length - 1, next));
+    markerEls[next].focus();
+    hoveredIndex = next;
+    pinnedIndex = null;
+    cancelClose();
+    updatePanel();
+  }
+  if (e.key === "Escape") {
+    pinnedIndex = null;
+    hoveredIndex = null;
+    cancelClose();
+    updatePanel();
+  }
+});
+
+/* Close when clicking page background */
+document.body.addEventListener("click", (e) => {
+  if (e.target === document.body) {
+    pinnedIndex = null;
+    hoveredIndex = null;
+    cancelClose();
+    updatePanel();
+  }
+});
+
+/* Panel navigation arrows */
+const prevBtn = document.getElementById("prev-btn");
+const nextBtn = document.getElementById("next-btn");
+
+function scrollToMarker(i) {
+  const el = markerEls[i];
+  if (!el) return;
+  const vp = viewportEl;
+  const vr = vp.getBoundingClientRect();
+  const mr = el.getBoundingClientRect();
+  const overshoot = (mr.left + mr.width / 2) - (vr.left + vr.width / 2);
+  const target = Math.max(
+    0,
+    Math.min(vp.scrollWidth - vp.clientWidth, vp.scrollLeft + overshoot)
+  );
+  vp.scrollTo({ left: target, behavior: "smooth" });
+}
+
+function step(delta) {
+  const idx = pinnedIndex !== null ? pinnedIndex : (hoveredIndex !== null ? hoveredIndex : 0);
+  const next = Math.max(0, Math.min(MILESTONES.length - 1, idx + delta));
+  pinnedIndex = next;
+  hoveredIndex = null;
+  cancelClose();
+  updatePanel();
+  scrollToMarker(next);
+}
+
+prevBtn.addEventListener("click", (e) => { e.stopPropagation(); step(-1); });
+nextBtn.addEventListener("click", (e) => { e.stopPropagation(); step(1); });
+
+/* Arrow keys work in the panel too */
+panel.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowLeft") { e.preventDefault(); step(-1); }
+  if (e.key === "ArrowRight") { e.preventDefault(); step(1); }
+  if (e.key === "Escape") {
+    pinnedIndex = null;
+    hoveredIndex = null;
+    cancelClose();
+    updatePanel();
+  }
+});
+
+/* -------------------------------------------------------------
+   Scale modes & re-layout
+   ------------------------------------------------------------- */
+const numberLineEl = document.querySelector(".number-line");
+const modeDeepBtn = document.getElementById("mode-deep");
+const modeHumanBtn = document.getElementById("mode-human");
+const modePowersBtn = document.getElementById("mode-powers");
+const zoomOutBtn = document.getElementById("zoom-out");
+const zoomInBtn = document.getElementById("zoom-in");
+const BASE_VW = { deep: 350, human: 350, powers: 260 };
+let zoom = 1;
+
+function buildLineGradient() {
+  const stops = [];
+  MILESTONES.forEach((m, i) => {
+    const f = fracFor(i);
+    if (f === null) return;
+    const p = f * 100;
+    const c = eventColor(i);
+    const lo = Math.max(0, p - 0.9);
+    const hi = Math.min(100, p + 0.9);
+    stops.push(`${c} ${lo.toFixed(2)}%`, `${c} ${hi.toFixed(2)}%`);
+  });
+  if (stops.length) {
+    numberLineEl.style.background = `linear-gradient(90deg, ${stops.join(", ")})`;
+  }
+}
+
+function applyPositions() {
+  track.style.width = trackWidthVw().toFixed(2) + "vw";
+  track.style.minWidth = track.style.width;
+  markerEls.forEach((el, i) => {
+    const f = fracFor(i);
+    const hidden = f === null;
+    [el, labelEls[i], connectorEls[i]].forEach((node) => {
+      node.style.display = hidden ? "none" : "";
+    });
+    if (hidden) return;
+    const pct = `${(f * 100).toFixed(4)}%`;
+    el.style.left = pct;
+    labelEls[i].style.left = pct;
+    connectorEls[i].style.left = pct;
+  });
+  layoutLabels();
+  buildLineGradient();
+  updateWash();
+}
+
+function trackWidthVw() {
+  return BASE_VW[scaleMode] * zoom;
+}
+
+function baseWidthVw() {
+  return BASE_VW[scaleMode];
+}
+
+function setZoom(next) {
+  zoom = Math.min(4, Math.max(0.35, next));
+  const vp = viewportEl;
+  const old = track.getBoundingClientRect().width;
+  const frac = (vp.scrollLeft + vp.clientWidth / 2) / old; // content fraction at centre
+  track.style.width = trackWidthVw().toFixed(2) + "vw";
+  track.style.minWidth = track.style.width;
+  requestAnimationFrame(() => {
+    vp.scrollLeft = Math.max(
+      0,
+      Math.min(vp.scrollWidth - vp.clientWidth, frac * track.getBoundingClientRect().width - vp.clientWidth / 2)
+    );
+    layoutLabels();
+    updateWash();
+  });
+}
+
+zoomOutBtn.addEventListener("click", () => setZoom(zoom / 1.4));
+zoomInBtn.addEventListener("click", () => setZoom(zoom * 1.4));
+
+/* Mouse wheel zooms the timeline (shift+wheel still scrolls) */
+viewportEl.addEventListener("wheel", (e) => {
+  if (e.shiftKey) return;
+  if (!document.querySelector(".panel") || document.querySelector(".panel").classList.contains("open") && !false) {
+    // zoom only when the details panel is closed
+  }
+  e.preventDefault();
+  const factor = e.deltaY > 0 ? 1 / 1.28 : 1.28;
+  setZoom(zoom * factor);
+}, { passive: false });
+
+function setScaleMode(mode) {
+  if (scaleMode === mode) return;
+  scaleMode = mode;
+  zoom = 1;
+  modeDeepBtn.classList.toggle("on", mode === "deep");
+  modeHumanBtn.classList.toggle("on", mode === "human");
+  modePowersBtn.classList.toggle("on", mode === "powers");
+  viewportEl.scrollLeft = 0;
+  const current = displayedIndex();
+  if (current !== null && fracFor(current) === null) {
+    pinnedIndex = null;
+    hoveredIndex = null;
+    cancelClose();
+    updatePanel();
+  } else if (pinnedIndex !== null && hoveredIndex === null) {
+    scrollToMarker(pinnedIndex);
+  }
+  applyPositions();
+  updateHash();
+}
+
+modeDeepBtn.addEventListener("click", () => setScaleMode("deep"));
+modeHumanBtn.addEventListener("click", () => setScaleMode("human"));
+modePowersBtn.addEventListener("click", () => setScaleMode("powers"));
+
+/* -------------------------------------------------------------
+   Event selection helpers + search + era legend jumps
+   ------------------------------------------------------------- */
+function selectEvent(i) {
+  if (fracFor(i) === null) setScaleMode("deep");
+  cancelClose();
+  pinnedIndex = i;
+  hoveredIndex = null;
+  updatePanel();
+  scrollToMarker(i);
+}
+
+/* Era legend chips jump to the first event of that era */
+document.getElementById("legend").addEventListener("click", (e) => {
+  const chip = e.target.closest(".chip");
+  if (!chip) return;
+  const era = chip.dataset.era;
+  if (!era) return;
+  let idx = MILESTONES.findIndex(
+    (m) => m.era === era && fracFor(MILESTONES.indexOf(m)) !== null
+  );
+  if (idx === -1) {
+    setScaleMode("deep");
+    idx = MILESTONES.findIndex((m) => m.era === era);
+  }
+  if (idx !== -1) selectEvent(idx);
+});
+
+/* Search */
+const searchInput = document.getElementById("search-input");
+const searchResults = document.getElementById("search-results");
+
+function hideResults() {
+  searchResults.hidden = true;
+  searchResults.innerHTML = "";
+}
+
+function runSearch() {
+  const q = searchInput.value.trim().toLowerCase();
+  if (!q) { hideResults(); return; }
+  const matches = [];
+  MILESTONES.forEach((m, i) => {
+    const hay = `${m.title} ${m.era} ${m.summary} ${m.kid} ${m.yearsAgo}`.toLowerCase();
+    if (hay.includes(q)) matches.push(i);
+  });
+  searchResults.hidden = false;
+  searchResults.innerHTML = "";
+  if (!matches.length) {
+    const div = document.createElement("div");
+    div.className = "search-empty";
+    div.textContent = "No matching events on this timeline.";
+    searchResults.appendChild(div);
+    return;
+  }
+  matches.forEach((i) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "search-result";
+    const dot = document.createElement("span");
+    dot.className = "sr-dot";
+    dot.style.background = eventColor(i);
+    const label = document.createElement("span");
+    label.textContent = MILESTONES[i].title;
+    const time = document.createElement("span");
+    time.className = "sr-time";
+    time.textContent = formatTime(MILESTONES[i].yearsAgo);
+    btn.appendChild(dot);
+    btn.appendChild(label);
+    btn.appendChild(time);
+    btn.addEventListener("mousedown", (e) => e.preventDefault()); // keep input focus
+    btn.addEventListener("click", () => {
+      selectEvent(i);
+      hideResults();
+      searchInput.blur();
+    });
+    searchResults.appendChild(btn);
+  });
+}
+
+searchInput.addEventListener("input", runSearch);
+searchInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    const first = searchResults.querySelector(".search-result");
+    if (first) first.click();
+  }
+  if (e.key === "Escape") {
+    searchInput.value = "";
+    hideResults();
+    searchInput.blur();
+  }
+});
+
+/* Apply the timeline to the current scale mode right away */
+applyPositions();
+
+/* -------------------------------------------------------------
+   Guided tour: walk the full story automatically.
+   ------------------------------------------------------------- */
+const tourBtn = document.getElementById("tour-btn");
+let tourIndex = 0;
+let tourTimer = null;
+const TOUR_DELAY = 6000;
+
+function updateTourButton(text) {
+  tourBtn.textContent = text;
+}
+
+function tourLabel() {
+  return "⏸ Tour " + String(tourIndex + 1) + "/" + MILESTONES.length + " · " + MILESTONES[tourIndex].title;
+}
+
+function stopTour() {
+  if (tourTimer) { clearInterval(tourTimer); tourTimer = null; }
+  updateTourButton("▶ Take the tour");
+}
+
+function startTour() {
+  stopTour();
+  tourIndex = 0;
+  selectEvent(tourIndex);
+  updateTourButton(tourLabel());
+  tourTimer = setInterval(function () {
+    tourIndex += 1;
+    if (tourIndex >= MILESTONES.length) { stopTour(); return; }
+    selectEvent(tourIndex);
+    updateTourButton(tourLabel());
+  }, TOUR_DELAY);
+}
+
+tourBtn.addEventListener("click", function () {
+  if (tourTimer) { stopTour(); } else { startTour(); }
+});
+
+/* Stop the tour if the user takes over by hovering or pinning */
+markerEls.forEach(function (el) {
+  ["mouseenter", "click"].forEach(function (evt) {
+    el.addEventListener(evt, function () { if (tourTimer) stopTour(); });
+  });
+});
+
+/* -------------------------------------------------------------
+   Glossary modal
+   ------------------------------------------------------------- */
+const glossaryBtn = document.getElementById("glossary-btn");
+const glossaryModal = document.getElementById("glossary-modal");
+const glossaryCloseBtn = document.getElementById("glossary-close");
+const glossaryList = document.getElementById("glossary-list");
+
+function openGlossary() {
+  glossaryList.innerHTML = "";
+  Object.keys(GLOSSARY).forEach(function (term) {
+    const item = document.createElement("div");
+    item.className = "glossary-item";
+    const b = document.createElement("b");
+    b.textContent = term;
+    const p = document.createElement("p");
+    p.textContent = GLOSSARY[term];
+    item.appendChild(b);
+    item.appendChild(p);
+    glossaryList.appendChild(item);
+  });
+  glossaryModal.hidden = false;
+}
+
+function closeGlossary() {
+  glossaryModal.hidden = true;
+}
+
+glossaryBtn.addEventListener("click", function () {
+  if (glossaryModal.hidden) openGlossary(); else closeGlossary();
+});
+glossaryCloseBtn.addEventListener("click", closeGlossary);
+glossaryModal.addEventListener("click", function (e) {
+  if (e.target === glossaryModal) closeGlossary();
+});
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape" && !glossaryModal.hidden) closeGlossary();
+});
+
+/* Any "see all terms" chip opens the modal too */
+document.addEventListener("click", function (e) {
+  if (e.target && e.target.id === "glossary-open-inline") openGlossary();
+});
+
+/* -------------------------------------------------------------
+   Quiz mode
+   ------------------------------------------------------------- */
+const quizBtn = document.getElementById("quiz-btn");
+const quizModal = document.getElementById("quiz-modal");
+const quizCloseBtn = document.getElementById("quiz-close");
+const quizProgress = document.getElementById("quiz-progress");
+const quizQuestion = document.getElementById("quiz-question");
+const quizOptions = document.getElementById("quiz-options");
+const quizFeedback = document.getElementById("quiz-feedback");
+const quizNext = document.getElementById("quiz-next");
+
+let quizQuestions = [];
+let quizPos = 0;
+let quizScore = 0;
+
+function openQuiz() {
+  quizQuestions = TimelineCore.makeQuiz(5);
+  quizPos = 0;
+  quizScore = 0;
+  renderQuizQuestion();
+  quizModal.hidden = false;
+}
+
+function closeQuiz() {
+  quizModal.hidden = true;
+}
+
+function renderQuizQuestion() {
+  const q = quizQuestions[quizPos];
+  quizProgress.textContent =
+    "Question " + (quizPos + 1) + " of " + quizQuestions.length + " · Score " + quizScore +
+    (q.type === "which-first" ? " · Which came first?" : " · Which is oldest?");
+  quizQuestion.textContent = q.question;
+  quizFeedback.hidden = true;
+  quizNext.hidden = true;
+  quizOptions.innerHTML = "";
+  q.options.forEach(function (opt, idx) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "quiz-option";
+    btn.textContent = opt;
+    btn.addEventListener("click", function () { answerQuiz(q, idx, btn); });
+    quizOptions.appendChild(btn);
+  });
+}
+
+function answerQuiz(q, idx, btn) {
+  const buttons = quizOptions.querySelectorAll(".quiz-option");
+  buttons.forEach(function (b) { b.disabled = true; });
+  const correct = idx === q.answerIndex;
+  if (correct) quizScore += 1;
+  buttons[q.answerIndex].classList.add("correct");
+  if (!correct) btn.classList.add("wrong");
+  quizFeedback.hidden = false;
+  quizFeedback.textContent = (correct ? "✔ Correct! " : "✘ Not quite — ") + q.fact;
+  quizNext.hidden = false;
+  quizNext.textContent = quizPos + 1 < quizQuestions.length ? "Next question ▶" : "See result ▶";
+  quizProgress.textContent =
+    "Question " + (quizPos + 1) + " of " + quizQuestions.length + " · Score " + quizScore;
+}
+
+quizNext.addEventListener("click", function () {
+  quizPos += 1;
+  if (quizPos >= quizQuestions.length) {
+    quizProgress.textContent = "Score " + quizScore + " / " + quizQuestions.length;
+    quizQuestion.textContent = quizScore + "/" + quizQuestions.length + " — " +
+      (quizScore === quizQuestions.length ? "perfect! You are a time traveller." :
+       quizScore >= quizQuestions.length / 2 ? "solid work, historian!" : "a reason to keep exploring — take the tour!");
+    quizOptions.innerHTML = "";
+    quizFeedback.hidden = true;
+    quizNext.hidden = true;
+    const again = document.createElement("button");
+    again.type = "button";
+    again.className = "quiz-option";
+    again.textContent = "🔁 New quiz";
+    again.addEventListener("click", openQuiz);
+    quizOptions.appendChild(again);
+    return;
+  }
+  renderQuizQuestion();
+});
+
+quizBtn.addEventListener("click", function () {
+  if (quizModal.hidden) openQuiz(); else closeQuiz();
+});
+quizCloseBtn.addEventListener("click", closeQuiz);
+quizModal.addEventListener("click", function (e) {
+  if (e.target === quizModal) closeQuiz();
+});
+
+/* -------------------------------------------------------------
+   Printable handout — a one-page worksheet for the selected event
+   ------------------------------------------------------------- */
+function buildHandout(index) {
+  const m = MILESTONES[index];
+  const sheet = document.getElementById("print-sheet");
+  sheet.innerHTML = "";
+  const h1 = document.createElement("h1");
+  h1.textContent = m.title;
+  const meta = document.createElement("div");
+  meta.className = "meta";
+  meta.textContent = formatTime(m.yearsAgo) + " · " + m.era + " · Cosmic Timeline classroom handout";
+  const story = document.createElement("h2");
+  story.textContent = "The bigger story";
+  const storyP = document.createElement("p");
+  storyP.textContent = m.summary;
+  const kid = document.createElement("h2");
+  kid.textContent = "Explain it to a 6-year-old";
+  const kidP = document.createElement("p");
+  kidP.textContent = m.kid + " 💡 " + m.fun;
+  const deep = document.createElement("h2");
+  deep.textContent = "Go deeper — discussion points";
+  const ul = document.createElement("ul");
+  m.deep.forEach(function (d) {
+    const li = document.createElement("li");
+    li.textContent = d;
+    ul.appendChild(li);
+  });
+  sheet.appendChild(h1);
+  sheet.appendChild(meta);
+  sheet.appendChild(story);
+  sheet.appendChild(storyP);
+  sheet.appendChild(kid);
+  sheet.appendChild(kidP);
+  sheet.appendChild(deep);
+  sheet.appendChild(ul);
+  const words = TimelineCore.glossaryTermsFor(
+    (m.summary + " " + m.deep.join(" ")).toLowerCase()
+  );
+  if (words.length) {
+    const w = document.createElement("h2");
+    w.textContent = "Words to know";
+    const chipBox = document.createElement("div");
+    words.forEach(function (pair) {
+      const chip = document.createElement("span");
+      chip.className = "chip";
+      chip.textContent = pair.term;
+      chipBox.appendChild(chip);
+    });
+    sheet.appendChild(w);
+    sheet.appendChild(chipBox);
+  }
+  const footer = document.createElement("footer");
+  footer.textContent = "Printed from The Cosmic Timeline · Discussion prompts: Which of these events surprised you? What do you think made it possible?";
+  sheet.appendChild(footer);
+}
+
+const printBtn = document.getElementById("print-btn");
+printBtn.addEventListener("click", function () {
+  let idx = pinnedIndex !== null ? pinnedIndex : (hoveredIndex !== null ? hoveredIndex : 0);
+  if (fracFor(idx) === null) { setScaleMode("deep"); idx = pinnedIndex !== null ? pinnedIndex : 0; }
+  buildHandout(idx);
+  window.print();
+});
+
+/* -------------------------------------------------------------
+   Shareable permalinks: #event=<slug>&mode=<deep|human>
+   ------------------------------------------------------------- */
+function slugFor(i) {
+  return TimelineCore.slugify(MILESTONES[i].title);
+}
+
+function updateHash() {
+  if (typeof history === "undefined" || !history.replaceState) return;
+  const parts = [];
+  if (pinnedIndex !== null) parts.push("event=" + slugFor(pinnedIndex));
+  if (scaleMode !== "deep") parts.push("mode=" + scaleMode);
+  history.replaceState(null, "", parts.length ? "#" + parts.join("&") : "#");
+}
+
+function restoreFromHash() {
+  const h = location.hash.replace(/^#/, "");
+  if (!h) return false;
+  const params = new URLSearchParams(h);
+  const mode = params.get("mode");
+  const ev = params.get("event");
+  let matched = false;
+  if (["deep", "human", "powers"].includes(mode)) {
+    if (mode !== scaleMode) setScaleMode(mode);
+    matched = true;
+  }
+  if (ev) {
+    const idx = MILESTONES.findIndex(function (m) {
+      return TimelineCore.slugify(m.title) === ev;
+    });
+    if (idx !== -1) {
+      if (scaleMode === "human" && MILESTONES[idx].yearsAgo > HUMAN_MAX) setScaleMode("deep");
+      pinnedIndex = idx;
+      hoveredIndex = null;
+      cancelClose();
+      updatePanel();
+      scrollToMarker(idx);
+      updateHash();
+      matched = true;
+    }
+  }
+  return matched;
+}
+
+restoreFromHash();
+
+/* Era legend */
+const legend = document.getElementById("legend");
+Object.keys(ERA_COLORS).forEach((era) => {
+  const chip = document.createElement("span");
+  chip.className = "chip";
+  chip.dataset.era = era;
+  chip.title = ERA_INFO[era] || era; // era explainer on hover
+  const swatch = document.createElement("span");
+  swatch.className = "swatch";
+  swatch.style.background = ERA_COLORS[era];
+  swatch.style.color = ERA_COLORS[era];
+  chip.appendChild(swatch);
+  chip.appendChild(document.createTextNode(era));
+  legend.appendChild(chip);
+});
+
+/* Axis labels were removed — compact tiered labels sit on each marker now */
+
+/* Initial focus polish */
+track.focus();
+
+/* PWA: register the service worker and warm the image cache so
+   the app works offline after the first full pass. */
+if ("serviceWorker" in navigator && (location.protocol === "http:" || location.protocol === "https:")) {
+  navigator.serviceWorker.register("./sw.js").catch(() => {});
+  navigator.serviceWorker.ready.then(async () => {
+    // Pre-fetch all event images at a gentle pace so they are cached
+    // for offline use (and so the SW never caches error responses).
+    for (const m of Object.values(EVENT_MEDIA)) {
+      if (!m || !m.url) continue;
+      try { await fetch(m.url, { mode: "no-cors" }); } catch (e) { /* ignore */ }
+    }
+  }).catch(() => {});
+}
+
+</script>
+</body>
+</html>

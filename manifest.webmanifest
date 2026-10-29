@@ -1,0 +1,15 @@
+{
+  "name": "Cosmic Timeline — Big Bang to Modern Era",
+  "short_name": "Timeline",
+  "description": "A scrollable number-line of events from the Big Bang to the modern era, with kid, story and nerd-level details for every milestone.",
+  "start_url": "./timeline.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0d10",
+  "theme_color": "#0b0d10",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icon.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
