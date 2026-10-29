@@ -273,7 +273,26 @@ async function main() {
     assert.deepEqual(handout.titles.slice(0, 2), ["The bigger story", "Explain it to a 6-year-old"]);
     ok("printable handout builds with all three reading levels");
 
-    // ── 16. No console errors throughout ────────────────────────────
+    // ── 16. Curriculum tag chips filter the line ─────────────────────
+    await driver.executeScript("document.getElementById('tags').scrollIntoView()");
+    const tagChips = await driver.executeScript(
+      "return [...document.querySelectorAll('.tag-chip')].length");
+    assert.ok(tagChips >= 8, `tag chips rendered: ${tagChips}`);
+    await driver.executeScript(
+      "[...document.querySelectorAll('.tag-chip')].find(c => c.dataset.tag === 'medicine & health').click()");
+    await waitLoad(250);
+    const dimmed = await driver.executeScript(
+      "return [...document.querySelectorAll('.marker.dimmed')].length");
+    assert.ok(dimmed > 30, `non-medicine events dimmed: ${dimmed}`);
+    // clicking the active chip clears the filter
+    await driver.executeScript(
+      "[...document.querySelectorAll('.tag-chip')].find(c => c.dataset.tag === 'medicine & health').click()");
+    const dimmedAfterClear = await driver.executeScript(
+      "return [...document.querySelectorAll('.marker.dimmed')].length");
+    assert.equal(dimmedAfterClear, 0);
+    ok(`curriculum chips filter the line (${dimmed} dimmed for medicine & health)`);
+
+    // ── 17. No console errors throughout ────────────────────────────
 
     const logs = (await driver.manage().logs().get("browser").catch(() => [])).filter(
       (l) => l.level.name === "SEVERE" && !l.message.includes("favicon")

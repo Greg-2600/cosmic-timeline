@@ -1361,6 +1361,127 @@ const MILESTONES = [
     "three-axis control": "The breakthrough of the Wright brothers: keeping an aircraft level and steerable using roll, pitch and yaw.",
   };
 
+
+  /* -------------------------------------------------------------
+     Curriculum tags: teacher-friendly subject labels per event.
+     ------------------------------------------------------------- */
+  const CURRICULUM_TAGS = [
+    "astronomy & space",
+    "physics & chemistry",
+    "geology & climate",
+    "biology & evolution",
+    "ancient history",
+    "religion & ethics",
+    "empires & power",
+    "human migration",
+    "everyday life",
+    "technology & engineering",
+    "medicine & health",
+    "art & language",
+  ];
+
+  const ERA_DEFAULT_TAGS = {
+    "Cosmic origins": ["astronomy & space", "physics & chemistry"],
+    "Galaxies": ["astronomy & space"],
+    "Solar System": ["astronomy & space", "geology & climate"],
+    "Life": ["biology & evolution"],
+    "Humans": ["biology & evolution", "human migration"],
+    "Civilization": ["ancient history", "everyday life"],
+    "Biblical": ["religion & ethics", "ancient history"],
+    "World Powers": ["empires & power", "ancient history"],
+    "Modern": ["technology & engineering", "everyday life"],
+    "Present": ["technology & engineering", "everyday life"],
+  };
+
+  const CURRICULUM_OVERRIDES = {
+    "The Big Bang": ["astronomy & space", "physics & chemistry"],
+    "First Stars Ignite": ["astronomy & space", "physics & chemistry"],
+    "Milky Way Forms": ["astronomy & space"],
+    "Quasars Light Up": ["astronomy & space"],
+    "Cosmic Noon": ["astronomy & space"],
+    "The Cosmic Web Forms": ["astronomy & space"],
+    "Dark Energy Takes Over": ["astronomy & space", "physics & chemistry"],
+    "Solar System Forms": ["astronomy & space", "geology & climate"],
+    "Earth Forms": ["geology & climate"],
+    "The Moon Forms": ["astronomy & space", "geology & climate"],
+    "The First Oceans": ["geology & climate"],
+    "Late Heavy Bombardment": ["geology & climate"],
+    "First Life Appears": ["biology & evolution"],
+    "Photosynthesis Invented": ["biology & evolution", "physics & chemistry"],
+    "Oxygenation of the Atmosphere": ["physics & chemistry", "biology & evolution"],
+    "Complex Cells (Eukaryotes)": ["biology & evolution"],
+    "Cells Begin Pairing Up (Sex Evolves)": ["biology & evolution"],
+    "Snowball Earth": ["geology & climate", "biology & evolution"],
+    "First Complex Life": ["biology & evolution"],
+    "Plants Cover the Land": ["biology & evolution", "geology & climate"],
+    "Fish Walk onto Land": ["biology & evolution"],
+    "The Coal Forests": ["biology & evolution", "geology & climate"],
+    "The Great Dying": ["biology & evolution", "geology & climate"],
+    "Dinosaurs Appear": ["biology & evolution"],
+    "Dinosaur Extinction": ["biology & evolution", "geology & climate"],
+    "Whales Return to the Sea": ["biology & evolution"],
+    "The First Apes": ["biology & evolution"],
+    "First Hominids": ["biology & evolution", "human migration"],
+    "Fire in Our Hands": ["technology & engineering", "everyday life"],
+    "Homo sapiens": ["biology & evolution", "human migration"],
+    "Out of Africa": ["human migration"],
+    "Agriculture Begins": ["everyday life", "ancient history"],
+    "Creation": ["religion & ethics", "ancient history"],
+    "The Great Flood": ["religion & ethics"],
+    "Abraham's Journey": ["religion & ethics"],
+    "Exodus & Mount Sinai": ["religion & ethics", "ancient history"],
+    "King David Reigns": ["ancient history", "empires & power"],
+    "Solomon's Temple": ["ancient history", "art & language"],
+    "The Babylonian Exile": ["religion & ethics", "ancient history"],
+    "The Return & Second Temple": ["religion & ethics"],
+    "The Birth of Jesus": ["religion & ethics", "art & language"],
+    "The Crucifixion & Resurrection": ["religion & ethics"],
+    "The Second Temple Falls": ["religion & ethics", "ancient history"],
+    "The Wheel Turns": ["technology & engineering", "everyday life"],
+    "Writing Invented": ["art & language", "ancient history"],
+    "Great Pyramid of Giza": ["ancient history", "technology & engineering"],
+    "The Alphabet": ["art & language"],
+    "Democracy is Born": ["religion & ethics", "ancient history"],
+    "Roman Empire": ["empires & power", "technology & engineering"],
+    "Fall of Rome / Middle Ages": ["empires & power", "religion & ethics"],
+    "The Islamic Golden Age": ["ancient history", "art & language"],
+    "Printing Press": ["technology & engineering", "art & language"],
+    "The Mongol Empire": ["empires & power", "human migration"],
+    "Two Worlds Collide": ["empires & power", "human migration"],
+    "Menes Unifies Egypt": ["empires & power", "ancient history"],
+    "Hammurabi's Code": ["religion & ethics", "ancient history"],
+    "The Neo-Assyrian Empire": ["empires & power"],
+    "Darius & the Persian Empire": ["empires & power", "technology & engineering"],
+    "Alexander the Great": ["empires & power", "ancient history"],
+    "The Caliphates Spread": ["empires & power", "religion & ethics"],
+    "The British Empire": ["empires & power", "technology & engineering"],
+    "Industrial Revolution": ["technology & engineering", "everyday life"],
+    "Electricity Lights Up the World": ["technology & engineering", "physics & chemistry"],
+    "Newton Rewrites the Sky": ["physics & chemistry", "astronomy & space"],
+    "First Powered Flight": ["technology & engineering", "astronomy & space"],
+    "Moon Landing": ["astronomy & space", "technology & engineering"],
+    "Antibiotics Discovered": ["medicine & health"],
+    "Vaccines Discovered": ["medicine & health"],
+    "The Transistor": ["technology & engineering", "physics & chemistry"],
+    "The DNA Double Helix": ["medicine & health", "biology & evolution"],
+    "The Human Genome Mapped": ["medicine & health", "technology & engineering"],
+    "Internet & World Wide Web": ["technology & engineering", "everyday life"],
+    "Smartphones Change Everything": ["technology & engineering", "everyday life"],
+    "The Modern Era": ["technology & engineering", "everyday life"],
+    "The World Wars": ["empires & power", "medicine & health"],
+    "The Cold War": ["empires & power", "physics & chemistry"],
+  };
+
+  function curriculumTagsFor(m) {
+    const fromEra = ERA_DEFAULT_TAGS[m.era] || [];
+    const extra = CURRICULUM_OVERRIDES[m.title] || [];
+    const all = [];
+    fromEra.concat(extra).forEach(function (t) {
+      if (CURRICULUM_TAGS.indexOf(t) !== -1 && all.indexOf(t) === -1) all.push(t);
+    });
+    return all;
+  }
+
   /* -------------------------------------------------------------
      Glossary matching: which words-to-know appear in a passage?
      ------------------------------------------------------------- */
@@ -1389,18 +1510,22 @@ const MILESTONES = [
     return out;
   }
 
-  function makeQuiz(count, rng) {
+  function makeQuiz(count, rng, filter) {
     rng = rng || Math.random;
-    const n = Math.min(Math.max(count || 5, 1), 9);
+    const pool = (typeof filter === "function" ? MILESTONES.filter(filter) : MILESTONES)
+      .map((m) => MILESTONES.indexOf(m));
+    const n = Math.min(Math.max(count || 5, 1), Math.floor(pool.length / 2));
     const used = new Set();
     function randomIndex() {
       let i;
-      do { i = Math.floor(rng() * MILESTONES.length); } while (used.has(i));
+      do { i = pool[Math.floor(rng() * pool.length)]; } while (used.has(i));
       used.add(i);
       return i;
     }
     const questions = [];
     for (let k = 0; k < n; k++) {
+      // stop when the event supply can no longer feed a fresh question
+      if (used.size + ((k % 2 === 0) ? 2 : 3) > pool.length) break;
       if (k % 2 === 0) {
         // Which came first? (larger yearsAgo = older = first)
         const a = randomIndex();
@@ -1470,6 +1595,8 @@ const MILESTONES = [
     assignTiers: assignTiers,
     glossaryTermsFor: glossaryTermsFor,
     visibleInCivilization: visibleInCivilization,
+    CURRICULUM_TAGS: CURRICULUM_TAGS,
+    curriculumTagsFor: curriculumTagsFor,
     makeQuiz: makeQuiz,
     slugify: slugify,
   };

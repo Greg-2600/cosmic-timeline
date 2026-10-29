@@ -250,6 +250,48 @@
 
   .scroll-hint .hint-spacer { flex: 1; }
 
+  /* curriculum filter chips */
+  .tagsrow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.6rem;
+    padding: 0.5rem 1.5rem;
+    background: rgba(19, 23, 32, 0.5);
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+
+  .tagsrow .tags-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .tag-chip {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .tag-chip:hover { border-color: var(--accent); color: var(--text); }
+
+  .tag-chip.on {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+    font-weight: 700;
+  }
+
+  .marker.dimmed { opacity: 0.22; }
+  .marker-label.dimmed { opacity: 0.15; }
+  .connector.dimmed { opacity: 0.1; }
+
   /* Learn-more link inside the details panel */
   .learn-more {
     display: inline-flex;
@@ -436,6 +478,33 @@
   }
 
   #print-sheet[hidden] { display: none; }
+
+  .packs-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 0.5rem; margin-top: 0.75rem; }
+
+  .packs-list button {
+    text-align: left;
+    font: inherit;
+    font-size: 0.9rem;
+    padding: 0.55rem 0.8rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .packs-list button:hover { border-color: var(--accent); background: rgba(56, 189, 248, 0.06); }
+
+  /* print pack layout */
+  #print-sheet .pack-sub { color: #444; font-size: 10pt; margin: 4pt 0 12pt; }
+  #print-sheet .pack-event { break-inside: avoid-page; margin-bottom: 12pt; border-top: 1pt dashed #999; padding-top: 6pt; }
+  #print-sheet .pack-event h3 { font-size: 12pt; margin: 0 0 2pt; }
+  #print-sheet .pack-event .when { color: #666; font-size: 9pt; margin-bottom: 4pt; }
+  #print-sheet .pack-questions { margin: 6pt 0 0 14pt; }
+  #print-sheet .pack-questions li { font-size: 10pt; line-height: 1.4; }
+  #print-sheet .pack-fill { border-bottom: 1pt solid #555; min-height: 12pt; margin: 4pt 0; }
+  #print-sheet .pack-essay { margin-top: 14pt; border-top: 2pt solid #333; padding-top: 6pt; }
+  #print-sheet .pack-lines > div { border-bottom: 1pt solid #555; height: 16pt; margin: 4pt 0; }
 
   #glossary-btn {
     background: var(--surface);
@@ -832,13 +901,25 @@
 
 <div class="legend" id="legend"></div>
 
+<div class="tagsrow" id="tags"></div>
+
 <div class="searchbar">
   <input id="search-input" type="search" placeholder="Search events — try “moon”, “oxygen”, “Rome”…" autocomplete="off" spellcheck="false" />
   <button id="quiz-btn" class="seg" type="button" title="Classroom quiz: which came first?">🎓 Quiz</button>
   <button id="glossary-btn" class="seg" type="button" title="All words-to-know">🔤 Glossary</button>
   <button id="tour-btn" class="seg" type="button" title="Step through the whole story automatically">▶ Take the tour</button>
   <button id="print-btn" class="seg" type="button" title="Print a one-page handout for the selected event">🖨 Handout</button>
+  <button id="packs-btn" class="seg" type="button" title="Multi-page classroom worksheet for an era">📘 Packs</button>
   <div id="search-results" class="search-results" hidden></div>
+</div>
+
+<div class="glossary-modal" id="packs-modal" hidden>
+  <div class="glossary-card packs-card">
+    <button class="glossary-close" id="packs-close" aria-label="Close packs">✕</button>
+    <h2>📘 Era classroom packs</h2>
+    <p class="gl-sub">Pick an era — we build a multi-page worksheet (stories, a timeline strip to fill in, discussion questions, words to know, an essay prompt) — then print or save as PDF.</p>
+    <div id="packs-list" class="packs-list"></div>
+  </div>
 </div>
 
 <div class="glossary-modal" id="quiz-modal" hidden>
@@ -895,7 +976,7 @@
    yearsAgo: years before present (present = 0).
    era: broad cosmic/geological/human era.
    ------------------------------------------------------------- */
-const { MILESTONES, ERA_COLORS, formatTime, formatShort, MAX_YEARS, HUMAN_MAX, LEARN_MORE, GLOSSARY, ERA_INFO } = TimelineCore;
+const { MILESTONES, ERA_COLORS, formatTime, formatShort, MAX_YEARS, HUMAN_MAX, LEARN_MORE, GLOSSARY, ERA_INFO, CURRICULUM_TAGS, curriculumTagsFor } = TimelineCore;
 
 function eventColor(i) { return TimelineCore.eventColor(i); }
 function eventColorAlpha(i, a) { return TimelineCore.eventColorAlpha(i, a); }
@@ -1845,7 +1926,53 @@ function selectEvent(i) {
   scrollToMarker(i);
 }
 
-/* Era legend chips jump to the first event of that era */
+/* Curriculum filter chips */
+  (function tagFeature() {
+    if (!document.getElementById("tags")) return;
+    const tagsRow = document.getElementById("tags");
+    const label = document.createElement("span");
+    label.className = "tags-label";
+    label.textContent = "subjects:";
+    tagsRow.appendChild(label);
+
+    let activeTag = null;
+    const chipEls = [];
+
+    function applyTagFilter(tag) {
+      activeTag = tag;
+      chipEls.forEach(function (c) {
+        c.classList.toggle("on", c.dataset.tag === tag);
+      });
+      markerEls.forEach(function (el, i) {
+        const matches = tag === null || curriculumTagsFor(MILESTONES[i]).indexOf(tag) !== -1;
+        el.classList.toggle("dimmed", !matches);
+        labelEls[i].classList.toggle("dimmed", !matches);
+        connectorEls[i].classList.toggle("dimmed", !matches);
+      });
+    }
+
+    CURRICULUM_TAGS.forEach(function (tag) {
+      const used = MILESTONES.some(function (m) {
+        return curriculumTagsFor(m).indexOf(tag) !== -1;
+      });
+      if (!used) return;
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "tag-chip";
+      chip.dataset.tag = tag;
+      chip.textContent = tag;
+      chip.setAttribute("aria-pressed", "false");
+      chip.addEventListener("click", function () {
+        const next = activeTag === tag ? null : tag;
+        chip.setAttribute("aria-pressed", String(next === tag));
+        applyTagFilter(next);
+      });
+      chipEls.push(chip);
+      tagsRow.appendChild(chip);
+    });
+  })();
+
+  /* Era legend chips jump to the first event of that era */
 document.getElementById("legend").addEventListener("click", (e) => {
   const chip = e.target.closest(".chip");
   if (!chip) return;
@@ -1875,7 +2002,7 @@ function runSearch() {
   if (!q) { hideResults(); return; }
   const matches = [];
   MILESTONES.forEach((m, i) => {
-    const hay = `${m.title} ${m.era} ${m.summary} ${m.kid} ${m.yearsAgo}`.toLowerCase();
+    const hay = `${m.title} ${m.era} ${m.summary} ${m.kid} ${m.yearsAgo} ${curriculumTagsFor(m).join(" ")}`.toLowerCase();
     if (hay.includes(q)) matches.push(i);
   });
   searchResults.hidden = false;
@@ -2107,6 +2234,146 @@ quizCloseBtn.addEventListener("click", closeQuiz);
 quizModal.addEventListener("click", function (e) {
   if (e.target === quizModal) closeQuiz();
 });
+
+/* -------------------------------------------------------------
+   Era classroom packs — multi-page printable worksheets
+   ------------------------------------------------------------- */
+(function packsFeature() {
+  const packsBtn   = document.getElementById("packs-btn");
+  const packsModal = document.getElementById("packs-modal");
+  const packsClose = document.getElementById("packs-close");
+  const packsList  = document.getElementById("packs-list");
+
+  function openPacks() {
+    packsList.innerHTML = "";
+    Object.keys(ERA_INFO).forEach(function (era) {
+      const count = MILESTONES.filter(function (m) { return m.era === era; }).length;
+      if (!count) return;
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = era + "  (" + count + " events)";
+      btn.addEventListener("click", function () {
+        packsModal.hidden = true;
+        buildEraPack(era);
+        try { window.print(); } catch (e) {}
+      });
+      packsList.appendChild(btn);
+    });
+    packsModal.hidden = false;
+  }
+
+  packsBtn.addEventListener("click", function () { packsModal.hidden ? openPacks() : (packsModal.hidden = true); });
+  packsClose.addEventListener("click", function () { packsModal.hidden = true; });
+  packsModal.addEventListener("click", function (e) { if (e.target === packsModal) packsModal.hidden = true; });
+})();
+
+function buildEraPack(era) {
+  const events = MILESTONES.filter(function (m) { return m.era === era; });
+  const sheet = document.getElementById("print-sheet");
+  sheet.innerHTML = "";
+
+  const h1 = document.createElement("h1");
+  h1.textContent = era + " — classroom pack";
+  const sub = document.createElement("div");
+  sub.className = "pack-sub";
+  sub.textContent = "Cosmic Timeline · " + events.length + " events · student name ______________ · class ______";
+  sheet.appendChild(h1);
+  sheet.appendChild(sub);
+
+  const introH = document.createElement("h2");
+  introH.textContent = "About this era";
+  const introP = document.createElement("p");
+  introP.textContent = ERA_INFO[era] || "";
+  sheet.appendChild(introH);
+  sheet.appendChild(introP);
+
+  const stripH = document.createElement("h2");
+  stripH.textContent = "Timeline strip — write the year for each event";
+  sheet.appendChild(stripH);
+  events.forEach(function (m) {
+    const row = document.createElement("div");
+    const name = document.createElement("span");
+    name.textContent = m.title;
+    name.style.fontSize = "10pt";
+    const gap = document.createElement("span");
+    gap.className = "pack-fill";
+    gap.style.display = "inline-block";
+    gap.style.width = "60%";
+    row.appendChild(name);
+    row.appendChild(gap);
+    sheet.appendChild(row);
+  });
+
+  events.forEach(function (m, i) {
+    const ev = document.createElement("div");
+    ev.className = "pack-event";
+    const h3 = document.createElement("h3");
+    h3.textContent = (i + 1) + ". " + m.title;
+    const when = document.createElement("div");
+    when.className = "when";
+    when.textContent = formatTime(m.yearsAgo);
+    const story = document.createElement("p");
+    story.textContent = m.kid + " " + m.fun;
+    const bigger = document.createElement("p");
+    bigger.textContent = m.summary;
+    const qs = document.createElement("ul");
+    qs.className = "pack-questions";
+    const PROMPTS = [
+      "What surprised you most about this event?",
+      "Why did this matter for what came next?",
+      "How might life be different without it?",
+    ];
+    PROMPTS.forEach(function (qq) {
+      const li = document.createElement("li");
+      li.textContent = qq;
+      qs.appendChild(li);
+    });
+    ev.appendChild(h3);
+    ev.appendChild(when);
+    ev.appendChild(story);
+    ev.appendChild(bigger);
+    ev.appendChild(qs);
+    sheet.appendChild(ev);
+  });
+
+  const matchH = document.createElement("h2");
+  matchH.textContent = "Words to know (" + era + ")";
+  const chipBox = document.createElement("div");
+  const addedTerms = {};
+  Object.keys(GLOSSARY).forEach(function (term) {
+    events.forEach(function (m) {
+      const hay = (m.summary + " " + m.deep.join(" ")).toLowerCase();
+      if (hay.includes(term.toLowerCase()) && !addedTerms[term]) {
+        addedTerms[term] = true;
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.textContent = term + " — " + GLOSSARY[term];
+        chipBox.appendChild(chip);
+      }
+    });
+  });
+  sheet.appendChild(matchH);
+  sheet.appendChild(chipBox);
+
+  const essay = document.createElement("div");
+  essay.className = "pack-essay";
+  const eh = document.createElement("h2");
+  eh.textContent = "Essay prompt";
+  const ep = document.createElement("p");
+  ep.textContent = "Essay: choose the event from this era you think changed the world the most, and argue why.";
+  const ruled = document.createElement("div");
+  ruled.className = "pack-lines";
+  for (let li = 0; li < 12; li++) ruled.appendChild(document.createElement("div"));
+  essay.appendChild(eh);
+  essay.appendChild(ep);
+  essay.appendChild(ruled);
+  sheet.appendChild(essay);
+
+  const footer = document.createElement("footer");
+  footer.textContent = "Cosmic Timeline Era Pack · " + era + " · generated from timeline-core data · images via Wikimedia Commons (see site credits)";
+  sheet.appendChild(footer);
+  sheet.hidden = false;
+}
 
 /* -------------------------------------------------------------
    Printable handout — a one-page worksheet for the selected event

@@ -14,10 +14,22 @@ function seededRng(seed) {
   };
 }
 
-test("makeQuiz returns the requested number of questions (clamped to the event supply)", () => {
+test("makeQuiz returns the requested number of questions (bounded by the event supply)", () => {
   assert.equal(core.makeQuiz(5, seededRng(1)).length, 5);
   assert.equal(core.makeQuiz(1, seededRng(2)).length, 1);
-  assert.equal(core.makeQuiz(99, seededRng(3)).length, 9, "clamps at 9 (18 events worst case)");
+  const big = core.makeQuiz(99, seededRng(3)); // as many as ~76 events can feed
+  assert.ok(big.length >= 25 && big.length <= 38, "supply-bounded: " + big.length);
+});
+
+test("makeQuiz respects an era filter (teacher packs)", () => {
+  const qs = core.makeQuiz(5, null, (m) => m.era === "Biblical");
+  assert.ok(qs.length >= 2, "biblical pool feeds questions: " + qs.length);
+  const titles = new Set(qs.flatMap((q) => q.options));
+  titles.forEach((t) => assert.ok(core.LEARN_MORE[t] !== undefined, "title from data"));
+  qs.flatMap((q) => q.options).forEach((o) => {
+    const m = core.MILESTONES.find((mm) => mm.title === o);
+    assert.equal(m.era, "Biblical", "option outside filter: " + o);
+  });
 });
 
 test("'which came first?' questions are always answerable and correct", () => {
