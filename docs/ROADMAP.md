@@ -10,12 +10,12 @@ This document is the plan for **v1.1 (ship it as a public product)** and **v1.2 
 
 ### 1. Deploy & available everywhere
 **Goal:** anyone can open a URL and use/install it — not just localhost.
-- [x] ~~Serve~~ (already a single-page static file set)
-- [ ] Publish to **GitHub Pages** (repo `cosmic-timeline`, GitHub Actions workflow: run unit + Selenium on push, deploy `main` to Pages)
+- [x] Serve (already a single-page static file set)
+- [x] Publish to **GitHub Pages** (live: https://greg-2600.github.io/cosmic-timeline/timeline.html) (repo `cosmic-timeline`, GitHub Actions workflow: run unit + Selenium on push, deploy `main` to Pages)
 - [ ] Netlify/Cloudflare Pages as backup with branch previews for PRs
 - [ ] Custom domain + HTTPS (PWA install requires it)
-- [ ] Update `start_url`/`scope`/manifest icons for the live domain; verify offline install on Android/iOS from production
-- [ ] Social meta tags (Open Graph/Twitter card) + a nicer favicon set (192/512 PNG rendered off the SVG for services that don't take SVG)
+- [x] Update `start_url` (subpath-scope verified)/`scope`/manifest icons for the live domain; verify offline install on Android/iOS from production
+- [x] Social meta tags + a nicer favicon set (Open Graph/Twitter card) + a nicer favicon set (192/512 PNG rendered off the SVG for services that don't take SVG)
 - [ ] Sitemap/no-robots tweaks + a public GitHub README with the deployed link banner
 
 ### 2. Compliance, credits and privacy
@@ -64,7 +64,7 @@ This document is the plan for **v1.1 (ship it as a public product)** and **v1.2 
 - [ ] **Science & technology events** worth adding: the printing of Mercator's atlas, Darwin's *Origin* (1859), the discovery of DNA's structure we already have; Marie Curie (1903), the Pill (1960), Apollo–Soyuz (1975), the Human genome we have; mRNA vaccines (2020)
 - [ ] **Mesoamerican/African/Asian civilisations** to balance the Western tilt: Olmec (1200 BCE), Axum, Ghana/Mali empires, Great Zimbabwe, Ming treasure voyages (1405)
 
-Each is data + media + tests — the pipeline exists.
+Each is data + media + tests — all of them shipped in the v1.2 haul (91 → 92 events).
 
 ---
 
