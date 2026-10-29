@@ -6,7 +6,7 @@ Hover a dot. Open a panel. Read it like a bedtime story, then read it like a tex
 
 <p align="center">
   <img src="docs/screenshots/deep-time.jpg" width="720" alt="The full 13.8-billion-year timeline with the era-coloured spectrum line and a milestone detail panel open"/>
-  <br/><em>Deep time: 76 milestones, each with its own colour, tiered labels and a detail panel.</em>
+  <br/><em>Deep time: 92 milestones, each with its own colour, tiered labels and a detail panel.</em>
 </p>
 
 ---
@@ -111,11 +111,11 @@ Then each panel adds:
 
 **Engineering / ship-ability**
 
-- ✅ PWA: installable (`manifest.webmanifest` + SVG icon), service-worker cached shell **and all 75 images** (verified: 23 cache entries) → works fully offline after one visit
+- ✅ PWA: installable (`manifest.webmanifest` + SVG icon), service-worker cached shell **and all 90 images** (verified: 23 cache entries) → works fully offline after one visit
 - ✅ Never caches failed responses (rate-limit 429 poisoning and error-image caching are guarded)
 - ✅ Zero-dependency runtime; no build step; single-page
-- ✅ **50 unit tests** over the extracted pure core (data, scale math, colour algorithms, format tiers, layout algorithm, glossary matching)
-- ✅ **17-check Selenium E2E suite** in real Chrome (shell, panel, images, glossary, search, legend, zoom, arrows, keyboard, tour, close, PWA caches, console cleanliness)
+- ✅ **57 unit tests** over the extracted pure core (data, scale math, colour algorithms, format tiers, layout algorithm, glossary matching)
+- ✅ **20-check Selenium E2E suite** in real Chrome (shell, panel, images, glossary, search, legend, zoom, arrows, keyboard, tour, close, PWA caches, console cleanliness)
 - ✅ Hotlinked images use `Special:FilePath` (handles any original size), `referrerpolicy="no-referrer"`, `loading="lazy"`
 
 **Completeness**
@@ -137,7 +137,7 @@ Then each panel adds:
 ```
 ├── timeline.html            # the app: markup, styles, interaction glue
 ├── timeline-core.js         # pure data & logic — no DOM, fully unit-tested
-│   ├── MILESTONES           #   76 events × { era, kid, fun, summary, deep[4–5] , yearsAgo }
+│   ├── MILESTONES           #   92 events × { era, kid, fun, summary, deep[4–5] , yearsAgo }
 │   ├── EVENT_COLORS         #   per-event shades computed inside era hue families
 │   ├── fracFor(ya, max)     #   log-scale position, mode-aware (null = off-scale)
 │   ├── formatTime/formatShort
