@@ -42,7 +42,7 @@ jobs:
           cp -r docs _site/docs
           touch _site/.nojekyll
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: _site
 
