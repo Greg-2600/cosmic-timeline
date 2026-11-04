@@ -11,6 +11,6 @@
     "test": "npm run test:unit && npm run test:e2e"
   },
   "devDependencies": {
-    "selenium-webdriver": "^4.51.0"
+    "selenium-webdriver": "^4.52.0"
   }
 }
